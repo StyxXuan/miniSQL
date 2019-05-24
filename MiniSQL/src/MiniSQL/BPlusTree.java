@@ -5,7 +5,6 @@ public class BPlusTree {
 	class BPlusTreeNode{
 		String tableName;
 		String AttributeName;
-		BP
 		void add(Object data){};
 		void delete(Object data){};
 		
