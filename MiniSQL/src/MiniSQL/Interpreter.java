@@ -1,12 +1,20 @@
 package MiniSQL;
 
-public interface Interpreter {
+public class Interpreter {
 		
-	boolean checkSyntax(String sql);
+	public static boolean checkSyntax(String sql) {
+		return false;
+	};
 	
-	Request parse(String sql);
+	public static Request parse(String sql) {
+		return null;
+	}
 	
-	boolean checkLexeme(Request request);
+	public static boolean checkLexeme(Request request) {
+		return false;
+	}
 	
-	Response excute(Request request);
+	public static Response excute(Request request) {
+		return null;
+	}
 }
