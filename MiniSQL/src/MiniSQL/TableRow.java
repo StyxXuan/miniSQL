@@ -1,11 +1,11 @@
 package MiniSQL;
 
-import java.awt.List;
+import java.util.List;
 
 public class TableRow {
-	List attlist;
+	List<Attribute> attlist;
 	int attrinum;
-	TableRow(List attlist, int attrinum){
+	TableRow(List<Attribute> attlist, int attrinum){
 		this.attlist = attlist;
 		this.attrinum = attrinum;
 	}

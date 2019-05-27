@@ -1,9 +1,10 @@
 package MiniSQL;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.List;
 
 
-public class Buffer {
+public class Buffer implements BufferManager{
 	
 	List<Block> buffer;
 	
@@ -48,4 +49,24 @@ public class Buffer {
 	boolean isDirty(Block b){return b.isDirty;}
 	
 	boolean pin(Block b){return b.isPined;}
+	
+	public Block readFromFile(String file, int offset) throws IOException {
+		byte []b = null;
+		@SuppressWarnings("resource")
+		RandomAccessFile File = new RandomAccessFile(file, "rb");
+		File.write(b, offset, Block.Size);
+		Block B = new Block();
+		B.SetBlock(file, offset, BlockType.Table);
+		B.WriteData(b, Block.Size);
+		return B;
+	}
+	
+	public void writeToFile(Block b, String file, int offset) throws IOException{
+		if(isDirty(b)) {
+			@SuppressWarnings("resource")
+			RandomAccessFile File = new RandomAccessFile(file, "wb");
+			File.seek(offset);
+			File.write(b.data, offset, b.spaceUsed);
+		}
+	}
 }

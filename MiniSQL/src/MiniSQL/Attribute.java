@@ -10,6 +10,9 @@ public class Attribute {
 		this.attriName = attriName;
 		this.length = length;
 		this.offset = offset;
+		this.isUnique = false;
+		this.isUnique = false;
+		this.hasIndex = false;
 	}
 	
 	public void SetPrimary() {
