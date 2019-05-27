@@ -17,7 +17,15 @@ public class CatalogManager {
 		return Flag;
 	}
 	
-//	int fieldCount(String table);
+	int fieldCount(String table) {
+		int i=0;
+		for(i=0; i<Tables.size(); i++) {
+			if(Tables.get(i).TableName.equals(table))
+				break;
+		}
+		Table t = Tables.get(i);
+		return t.RecordNum;
+	}
 //	
 //	int indexCount(String table);
 	
