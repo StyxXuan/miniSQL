@@ -2,16 +2,25 @@ package MiniSQL;
 import java.util.List;
 
 
-public interface IndexManager {
+public class IndexManager {
 		
-	boolean createIndex(String table, String field);
+	public static boolean createIndex(String table, String field) {
+		return false;
+	}
 
-	boolean dropIndex(String index);
+	public static boolean dropIndex(String index) {
+		return false;
+	}
 	
-	List<Address> select(String index, List<Condition> conditions);
+	public static List<Address> select(String index, List<Condition> conditions) {
+		return null;
+	}
 	
-	boolean insert(String index, Object data, FieldType type, Address addr);
+	public static boolean insert(String index, Object data, FieldType type, Address addr) {
+		return false;
+	}
 	
-	List<Address> delete(String index, List<Condition> conditions);
-	
+	public static List<Address> delete(String index, List<Condition> conditions) {
+		return null;
+	}
 }

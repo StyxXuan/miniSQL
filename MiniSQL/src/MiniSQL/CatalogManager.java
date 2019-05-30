@@ -4,60 +4,93 @@ import java.util.List;
 
 public class CatalogManager {
 	
-	private List<Table> Tables;
+//	
+//	public static boolean tableExists(String table) {
+//		int N = Tables.size();
+//		boolean Flag = false;
+//		
+//		for(int i=0; i<N; i++)
+//			if(Tables.get(i).TableName == table)
+//				Flag = true;
+//		
+//		return Flag;
+//	}
+//	
+//	public static int fieldCount(String table) {
+//		int i=0;
+//		for(i=0; i<Tables.size(); i++) {
+//			if(Tables.get(i).TableName.equals(table))
+//				break;
+//		}
+//		Table t = Tables.get(i);
+//		return t.RecordNum;
+//	}
 	
-	boolean tableExists(String table) {
-		int N = Tables.size();
-		boolean Flag = false;
-		
-		for(int i=0; i<N; i++)
-			if(Tables.get(i).TableName == table)
-				Flag = true;
-		
-		return Flag;
+	public static int indexCount(String table) {
+		return 0;
 	}
 	
-	int fieldCount(String table) {
-		int i=0;
-		for(i=0; i<Tables.size(); i++) {
-			if(Tables.get(i).TableName.equals(table))
-				break;
-		}
-		Table t = Tables.get(i);
-		return t.RecordNum;
+	public static List<String> fieldsOnTable(String table) {
+		return null;
 	}
-//	
-//	int indexCount(String table);
 	
-//	List<String> fieldsOnTable(String table);
-//	
-//	List<String> indicesOnTable(String table);
+	public static List<String> indicesOnTable(String table) {
+		return null;
+	}
 	
-//	int rowLength(String table);
+	public static int rowLength(String table) {
+		return 0;
+	}
 	
-//	String pkOnTable(String table);
+	public static String pkOnTable(String table) {
+		return null;
+	}
 	
-//	FieldType fieldType(String table, String field);
+	public static FieldType fieldType(String table, String field) {
+		return null;
+	}
 	
-//	boolean isUnique(String table, String field);
+	public static boolean isUnique(String table, String field) {
+		return false;
+	}
 	
-//	boolean isPK(String table, String field);
+	public static boolean isPK(String table, String field) {
+		return false;
+	}
 	
-//	boolean hasIndex(String table, String field);
+	public static boolean hasIndex(String table, String field) {
+		return false;
+	}
 	
-//	String indexName(String table, String field);
+	public static String indexName(String table, String field) {
+		return null;
+	}
 	
-//	String tableIndexOn(String index);
+	public static String tableIndexOn(String index) {
+		return null;
+	}
 	
-//	String fieldIndexOn(String index);
+	public static String fieldIndexOn(String index) {
+		return null;
+	}
 	
-//	boolean addTable();
-//
-//	boolean deleteTable(String table);
-//	
-//	boolean addIndex();
-//	
-//	boolean deleteIndex(String index);
-//	
-//	boolean storeToFile();
+	public static boolean addTable() {
+		return false;
+	}
+
+	public static boolean deleteTable(String table) {
+		return false;
+	}
+	
+	public static boolean addIndex() {
+		return false;
+	}
+	
+	public static boolean deleteIndex(String index) {
+		return false;
+	}
+	
+	public static boolean storeToFile() {
+		return false;
+	}
 }

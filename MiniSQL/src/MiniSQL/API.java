@@ -2,20 +2,34 @@ package MiniSQL;
 
 
 
-public interface API {
+public class API{
 	
-	Response createTable(Request request);
+	static public Response createTable(Request request) {
+		return null;
+	}
 	
-	Response dropTable(Request request);
+	static public Response dropTable(Request request) {
+		return null;
+	}
 	
-	Response createIndex(Request request);
+	static public Response createIndex(Request request) {
+		return null;
+	}
 	
-	Response dropIndex(Request request);
+	static public Response dropIndex(Request request) {
+		return null;
+	}
 	
-	Response select(Request request);
+	static public Response select(Request request) {
+		return null;
+	}
 	
-	Response insert(Request request);
+	static public Response insert(Request request) {
+		return null;
+	}
 	
-	Response delete(Request request);
+	static public Response delete(Request request) {
+		return null;
+	}
 
 }

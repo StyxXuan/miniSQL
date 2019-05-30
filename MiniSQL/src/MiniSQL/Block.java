@@ -56,6 +56,7 @@ public class Block {
 		this.spaceUsed += length;
 		this.data = NewData;
 	}
+	
 	@SuppressWarnings("resource")
 	public void WriteBack() throws IOException {
 		RandomAccessFile File = new RandomAccessFile(file, "wb");

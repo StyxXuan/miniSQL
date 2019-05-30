@@ -4,7 +4,7 @@ import java.io.RandomAccessFile;
 import java.util.List;
 
 
-public class Buffer implements BufferManager{
+public class Buffer{
 	
 	List<Block> buffer;
 	

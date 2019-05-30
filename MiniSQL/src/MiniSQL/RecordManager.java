@@ -2,18 +2,33 @@ package MiniSQL;
 import java.util.List;
 
 
-public interface RecordManager {
-	boolean createTable(Table table);
+public class RecordManager {
 	
-	boolean dropTable(Table table);
+	public static boolean createTable(Table table) {
+		return false;
+	}
 	
-	List<TableRow> select(Table table, List<Condition> conditions);
+	public static boolean dropTable(Table table) {
+		return false;
+	}
 	
-	Address insert(Table table, List<String> data);
+	public static List<TableRow> select(Table table, List<Condition> conditions) {
+		return null;
+	}
 	
-	int delete(Table table, List<Condition> conditions);
+	public static Address insert(Table table, List<String> data) {
+		return null;
+	}
 	
-	List<TableRow> select(List<Address> addr);
+	public static int delete(Table table, List<Condition> conditions) {
+		return 0;
+	}
 	
-	int delete(List<Address> addr);
+	public static List<TableRow> select(List<Address> addr) {
+		return null;
+	}
+	
+	public static int delete(List<Address> addr) {
+		return 0;
+	}
 }
