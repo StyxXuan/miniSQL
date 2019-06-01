@@ -1,4 +1,4 @@
-package MiniSQL;
+package RecordManager;
 import java.util.List;
 
 

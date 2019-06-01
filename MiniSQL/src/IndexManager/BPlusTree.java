@@ -1,4 +1,4 @@
-package MiniSQL;
+package IndexManager;
 
 public class BPlusTree {
 

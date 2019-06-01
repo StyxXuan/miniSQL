@@ -1,4 +1,4 @@
-package MiniSQL;
+package RecordManager;
 
 public class Attribute {
 	FieldType Type;

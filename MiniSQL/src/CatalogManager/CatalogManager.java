@@ -1,9 +1,9 @@
 package CatalogManager;
 import java.util.List;
 
-import MiniSQL.FieldType;
 import BufferManager.Block;
 import BufferManager.BufferManager;
+import RecordManager.FieldType;
 
 public class CatalogManager {
 	
@@ -49,7 +49,7 @@ public class CatalogManager {
 //		return null;
 //	}
 //	
-//	public static FieldType fieldType(String table, String field) {
+//	public static FieldType fxwieldType(String table, String field) {
 //		return null;
 //	}
 //	

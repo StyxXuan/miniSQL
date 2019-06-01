@@ -1,4 +1,4 @@
-package MiniSQL;
+package IndexManager;
 import java.util.List;
 
 

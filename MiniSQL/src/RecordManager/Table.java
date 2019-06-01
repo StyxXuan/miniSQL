@@ -1,4 +1,4 @@
-package MiniSQL;
+package RecordManager;
 
 public class Table {
 	String TableName;
