@@ -1,16 +1,19 @@
 package BufferManager;
 
 import java.io.IOException;
+import java.util.Map;
+
+import RecordManager.Table;
 
 public class BufferManager {
 	
 	private static int Max_Block = 1024;
 	
 	
-	static private Block []Buffer = new Block[Max_Block];
+	static public Block []Buffer = new Block[Max_Block];
 	static private int []Age = new int[Max_Block];
 	
-//	static private List<Table> tables;
+	static public Map<String, Table> tables;
 	
 	public void InitBuffer() {
 		for(int i=0; i<Max_Block; i++) {

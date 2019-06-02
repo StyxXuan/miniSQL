@@ -1,6 +1,5 @@
 package MiniSQL;
 
-
 public class Interpreter{
 		
 	public static boolean checkSyntax(String sql) {

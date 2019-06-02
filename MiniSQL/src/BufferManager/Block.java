@@ -27,8 +27,9 @@ public class Block {
 	public void LoadBlock() {
 		RandomAccessFile File;
 		try {
-			File = new RandomAccessFile(file, "rb");
-			File.read(this.data, this.fileOffset, Block.Size);
+			File = new RandomAccessFile(file, "rw");
+			File.seek(fileOffset);
+			File.read(this.data, 0, Block.Size);
 		} catch (FileNotFoundException e) {
 			System.out.println("Error happened in openning the file");
 			e.printStackTrace();
@@ -51,9 +52,9 @@ public class Block {
 	
 	@SuppressWarnings("resource")
 	public void WriteBack() throws IOException {
-		RandomAccessFile File = new RandomAccessFile(file, "wb");
+		RandomAccessFile File = new RandomAccessFile(file, "rw");
 		File.seek(fileOffset);
-		File.write(data, fileOffset, Block.Size);
+		File.write(data, 0, Block.Size);
 		this.isDirty = false;
 	}
 	

@@ -1,9 +1,9 @@
 package RecordManager;
 
 public class Table {
-	String TableName;
-	TableRow Row;
-	int RecordNum;
+	public String TableName;
+	public TableRow Row;
+	public int RecordNum;
 	
 	public Table(String TableName, TableRow Row) {
 		this.TableName = TableName; 
