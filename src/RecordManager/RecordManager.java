@@ -37,25 +37,25 @@ public class RecordManager {
 		return null;
 	}
 	
-	public static Address insert(Table table, List<String> data)
-	{
-		return null;
-	}
-	
-	public static int delete(Table table, List<Condition> conditions)
-	{
-		return 0;
-	}
-	
-	public static List<TableRow> select(List<Address> addr)
-	{
-		return null;
-	}
-	
-	public static int delete(List<Address> addr)
-	{
-		return 0;
-	}
+//	public static Address insert(Table table, List<String> data)
+//	{
+//		return null;
+//	}
+//	
+//	public static int delete(Table table, List<Condition> conditions)
+//	{
+//		return 0;
+//	}
+//	
+//	public static List<TableRow> select(List<Address> addr)
+//	{
+//		return null;
+//	}
+//	
+//	public static int delete(List<Address> addr)
+//	{
+//		return 0;
+//	}
 	public static String tableFileNameGet(String filename)
 	{
 		return "TABLE_FILE" + filename;
