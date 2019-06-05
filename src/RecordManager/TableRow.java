@@ -18,17 +18,4 @@ public class TableRow {
 		return size;
 	}
 	
-	public byte[] toByte(){
-		byte[] Data = new byte[this.RowSize()];
-//		int index = 0;
-//		for(int i=0; i<attrinum; i++) {
-//			Attribute att = attlist.get(i);
-//			byte []Mid = new byte[att.length];
-//			Mid = att.
-//			for(int j=0; j<att.length; j++) {
-//				Data[index++] = 
-//			}
-//		}
-		return Data;
-	}
 }
