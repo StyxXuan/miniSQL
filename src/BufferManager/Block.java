@@ -14,9 +14,9 @@ public class Block {
 	static int Size = 4096;
 	String file = "";
 	public int fileOffset = 0;
-	boolean isDirty = false;
-	boolean isPined = false;
-	boolean isValid = true;
+	public boolean isDirty = false;
+	public boolean isPined = false;
+	public boolean isValid = true;
 	byte[] data = new byte[Size];
 	
 	public void SetBlock(String file, int fileOffset) {

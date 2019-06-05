@@ -34,6 +34,14 @@ public class BufferManager {
 		}
 	}
 	
+	static public void RemoveBlockFromBuffer(Table table) {
+		for(int i=0; i<Max_Block; i++) {
+			if(Buffer[i].file == tableFileNameGet(table.TableName)) {
+				Buffer[i].isValid = false;
+			}
+		}
+	}
+	
 	static public Block GetNextBlock(Block b) {
 		return FindBlock(b.file, b.fileOffset + Max_Block);
 	}
@@ -75,5 +83,15 @@ public class BufferManager {
 		}
 		
 		return null;
+	}
+	
+	public static String tableFileNameGet(String filename)
+	{
+		return "TABLE_FILE" + filename + ".miniSQL";
+	}
+	
+	public static String indexFileNameGet(String filename)
+	{
+		return "INDEX_FILE" + filename + ".miniSQL";
 	}
 }

@@ -1,33 +1,97 @@
 package RecordManager;
 
+import java.util.Map;
+import java.util.Set;
+import java.util.Vector;
+
+import javafx.util.Pair;
+
 public class Condition
 {
-	final static int EQUAL = 0; // =
-	final static int NOT_EQUAL = 1; // <>
-	final static int LESS = 2; // <
-	final static int MORE = 3; // >
-	final static int LESS_EQUAL = 4; // <=
-	final static int MORE_EQUAL = 5; // >=
+	enum Operation{
+		EQUAL, NOT_EQUAL, LESS, MORE, LESS_EQUAL, MORE_EQUAL;
+	}
+
+	Vector<String> Attributes;
+	Vector<String> Numbers;
 	
-	String AttName;
-	String ToCampare;
-	int CompareSign;
+	Vector<Operation> Ops;
+	Vector<String>Conjunctions;
 	
-	boolean Compare_Int()
-	{
-		return false;
+	public Condition(String AttName, String ToCampare, Operation Op) {
+		Attributes.addElement(AttName);
+		Numbers.addElement(ToCampare);
+		Ops.addElement(Op);
+		Conjunctions = null;
 	}
-	boolean Compare_Float()
-	{
-		return false;
+	
+	public Condition(Vector<String> Attributes, Vector<String> Numbers, Vector<Operation> Ops, Vector<String>Conjunctions) {
+		this.Attributes = Attributes;
+		this.Numbers = Numbers;
+		this.Ops = Ops;
+		this.Conjunctions = Conjunctions;
 	}
-	boolean Compare_String()
-	{
-		return false;
+	
+	public boolean Satisfy(Tuple tup, TableRow Row) {
+		boolean res = false;
+		
+		return res;
 	}
-	boolean Compare_Char()
-	{
-		return false;
+	
+	public boolean Satisfy(Tuple tup, TableRow Row, String Attribute, String Number, Operation Op){
+		FieldType Type = Row.GetType(Attribute);
+		boolean res = false;
+		if(Op == Operation.EQUAL) {
+			if(Type == FieldType.FLOAT) {
+				float num = FLoat.parseFloat(Number);
+			}else if(Type == FieldType.INT) {
+				int num = Integer.getInteger(Number);
+			}else if(Type == FieldType.STRING) {
+				
+			}
+		}else if(Op == Operation.NOT_EQUAL) {
+			if(Type == FieldType.FLOAT) {
+				
+			}else if(Type == FieldType.INT) {
+				
+			}else if(Type == FieldType.STRING) {
+				
+			}
+		}else if(Op == Operation.LESS) {
+			if(Type == FieldType.FLOAT) {
+				
+			}else if(Type == FieldType.INT) {
+				
+			}else if(Type == FieldType.STRING) {
+				
+			}
+		}else if(Op == Operation.MORE) {
+			if(Type == FieldType.FLOAT) {
+				
+			}else if(Type == FieldType.INT) {
+				
+			}else if(Type == FieldType.STRING) {
+				
+			}
+		}else if(Op == Operation.LESS_EQUAL) {
+			if(Type == FieldType.FLOAT) {
+				
+			}else if(Type == FieldType.INT) {
+				
+			}else if(Type == FieldType.STRING) {
+				
+			}
+		}else if(Op == Operation.MORE_EQUAL) {
+			if(Type == FieldType.FLOAT) {
+				
+			}else if(Type == FieldType.INT) {
+				
+			}else if(Type == FieldType.STRING) {
+				
+			}
+		}
+		
+		return res;
 	}
 	
 }

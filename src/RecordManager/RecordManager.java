@@ -12,7 +12,7 @@ public class RecordManager {
 	
 	public static boolean createTable(Table table) throws IOException
 	{
-		String t_name = tableFileNameGet(table.TableName);
+		String t_name = BufferManager.tableFileNameGet(table.TableName);
 		
 		File ft = new File(t_name);
 		if(ft.exists())
@@ -22,26 +22,29 @@ public class RecordManager {
 		ft.createNewFile();
 		Block b = BufferManager.FindBlock(t_name, 0);
 		b.WriteInt(0, 0);
-		
+		b.isDirty = true;
 		return true;
 	}
 	
 	public static boolean dropTable(Table table)
 	{
-		String t_name = tableFileNameGet(table.TableName);
+		String t_name = BufferManager.tableFileNameGet(table.TableName);
 		File ft = new File(t_name);
 		if(!ft.exists())
-			return false;	
+			return false;
 		
+		BufferManager.RemoveBlockFromBuffer(table);
 		BufferManager.tables.remove(table.TableName);
 		return ft.delete();
 	}
 	
 	
-	public static void insertSingle(Table table, Tuple tup) {
-		String fileName = tableFileNameGet(table.TableName);
+	public static void insert(Table table, Tuple tup) {
+		String fileName = BufferManager.tableFileNameGet(table.TableName);
 		int TupSize = tup.size();
 		int MaxTupNum = BufferManager.Max_Block / TupSize;
+		
+		// Find the free space
 		Block b = BufferManager.FindBlock(fileName, 0);
 		int RowIndex = 0;
 		int Valid = b.GetInt(RowIndex * TupSize);
@@ -62,11 +65,11 @@ public class RecordManager {
 	{
 		int N = tups.size();
 		for(int i=0; i<N; i++) {
-			insertSingle(table, tups.get(i));
+			insert(table, tups.get(i));
 		}
 	}
 	
-	public static Vector<Tuple>selectSingleCondition(Table table, Condition condition){
+	public static Vector<Tuple>select(Table table, Condition condition){
 		return null;
 	}
 	
@@ -75,7 +78,7 @@ public class RecordManager {
 		Vector<Tuple> Selected = null;
 		int N = conditions.size();
 		for(int i=0; i<N; i++) {
-			Vector<Tuple> Mid = selectSingleCondition(table, conditions.get(i));
+			Vector<Tuple> Mid = select(table, conditions.get(i));
 			if(Selected!=null)
 				Selected.retainAll(Mid);
 			else
@@ -85,7 +88,7 @@ public class RecordManager {
 		return Selected;
 	}
 	
-	public static int deleteSingleCondition(Table table, Condition condition) {
+	public static int delete(Table table, Condition condition) {
 		return 0;
 	}
 	
@@ -94,19 +97,11 @@ public class RecordManager {
 		int Sum = 0;
 		int N = conditions.size();
 		for(int i=0; i<N; i++)
-			Sum += deleteSingleCondition(table, conditions.get(i));
+			Sum += delete(table, conditions.get(i));
 		
 		return Sum;
 	}
 
 	
-	public static String tableFileNameGet(String filename)
-	{
-		return "TABLE_FILE" + filename + ".miniSQL";
-	}
 	
-	public static String indexFileNameGet(String filename)
-	{
-		return "INDEX_FILE" + filename + ".miniSQL";
-	}
 }

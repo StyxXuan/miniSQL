@@ -1,21 +1,21 @@
 package RecordManager;
 
-import java.util.List;
+import java.util.Map;
 
 public class TableRow {
-	public List<Attribute> attlist;
+	public Map<String, Attribute> attlist;
+	public Map<String, Integer> Offset;
 	public int attrinum;
-	public TableRow(List<Attribute> attlist, int attrinum){
+	public TableRow(Map<String, Attribute> attlist, int attrinum){
 		this.attlist = attlist;
 		this.attrinum = attrinum;
+		for(int i=0; i<attlist.size(); i++) {
+			
+		}
 	}
 	
-	public int RowSize() {
-		int size = 0;
-		for(int i=0; i<attrinum; i++) {
-			size += attlist.get(i).length;
-		}
-		return size;
+	public FieldType GetType(String AttName) {
+		return attlist.get(AttName).Type;
 	}
 	
 }
