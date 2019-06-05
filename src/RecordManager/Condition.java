@@ -1,6 +1,6 @@
 package RecordManager;
 
-public class Condition
+public class Condition <T extends Comparable<T>>
 {
 	final static int EQUAL = 0; // =
 	final static int NOT_EQUAL = 1; // <>
@@ -9,24 +9,37 @@ public class Condition
 	final static int LESS_EQUAL = 4; // <=
 	final static int MORE_EQUAL = 5; // >=
 	
-	boolean Compare_Int()
-	{
-		return false;
-		
-	}
-	boolean Compare_Float()
-	{
-		return false;
-	}
-	boolean Compare_String()
-	{
-		return false;
-	}
-	boolean Compare_Char()
-	{
-		return false;
-	}
+	int operator;
+	String attributeName;
+	T com_value;
 	
-	
+	public Condition(String attri, T val, int op)
+	{
+		this.attributeName = attri;
+		this.com_value = val;
+		this.operator = op;
+	}
+	boolean Compare(T content)
+	{
+		T myContent = this.com_value;
+		switch(operator)
+		{
+		case EQUAL:
+			return (myContent.compareTo(content) == 0);
+		case NOT_EQUAL:
+			return (myContent.compareTo(content) != 0);
+		case LESS:
+			return (content.compareTo(myContent) < 0);
+		case MORE:
+			return (content.compareTo(myContent) > 0);
+		case LESS_EQUAL:
+			return (content.compareTo(myContent) <= 0);
+		case MORE_EQUAL:
+			return (content.compareTo(myContent) >= 0);
+		default:
+			return true;
+			
+		}
+	}
 	
 }
