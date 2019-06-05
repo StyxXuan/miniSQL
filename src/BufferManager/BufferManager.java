@@ -7,7 +7,7 @@ import RecordManager.Table;
 
 public class BufferManager {
 	
-	private static int Max_Block = 1024;
+	public static int Max_Block = 1024;
 	
 	
 	static public Block []Buffer = new Block[Max_Block];
@@ -15,14 +15,14 @@ public class BufferManager {
 	
 	static public Map<String, Table> tables;
 	
-	public void InitBuffer() {
+	static public void InitBuffer() {
 		for(int i=0; i<Max_Block; i++) {
 			Age[i] = 0;
 			Buffer[i] = new Block();
 		}
 	}
 	
-	public void FlushAll() {
+	static public void FlushAll() {
 		for(int i=0; i<Max_Block; i++) {
 			if(Buffer[i].isValid && Buffer[i].isDirty) {
 				try {
@@ -34,7 +34,11 @@ public class BufferManager {
 		}
 	}
 	
-	public int LRU() {
+	static public Block GetNextBlock(Block b) {
+		return FindBlock(b.file, b.fileOffset + Max_Block);
+	}
+	
+	static public int LRU() {
 		int index = -1;
 		int MIN = 10000;
 		for(int i=0; i<Max_Block; i++){
@@ -47,7 +51,7 @@ public class BufferManager {
 		return index;
 	}
 	
-	public boolean BufferReplace(int index, String file, int offset) {
+	static public boolean BufferReplace(int index, String file, int offset) {
 		if(Buffer[index].isDirty) {
 			try {
 				Buffer[index].WriteBack();
@@ -60,11 +64,11 @@ public class BufferManager {
 		return true;
 	}
 	
-	public Block GetBlock(int index) {
+	static public Block GetBlock(int index) {
 		return Buffer[index];
 	}
 	
-	public Block FindBlock(String file, int offset) {
+	static public Block FindBlock(String file, int offset) {
 		for(int i=0; i<Max_Block; i++){
 			if(Buffer[i].file == file && Buffer[i].fileOffset == offset)
 				return Buffer[i];

@@ -13,7 +13,7 @@ import java.io.RandomAccessFile;
 public class Block {
 	static int Size = 4096;
 	String file = "";
-	int fileOffset = 0;
+	public int fileOffset = 0;
 	boolean isDirty = false;
 	boolean isPined = false;
 	boolean isValid = true;
