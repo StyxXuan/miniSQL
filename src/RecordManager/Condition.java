@@ -9,10 +9,13 @@ public class Condition
 	final static int LESS_EQUAL = 4; // <=
 	final static int MORE_EQUAL = 5; // >=
 	
+	String AttName;
+	String ToCampare;
+	int CompareSign;
+	
 	boolean Compare_Int()
 	{
 		return false;
-		
 	}
 	boolean Compare_Float()
 	{
@@ -26,7 +29,5 @@ public class Condition
 	{
 		return false;
 	}
-	
-	
 	
 }

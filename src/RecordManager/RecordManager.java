@@ -37,16 +37,63 @@ public class RecordManager {
 		return ft.delete();
 	}
 	
-	public static Vector<TableRow>selectSingleCondition(Table table, Condition condition){
+	
+//	import java.util.Vector;
+//	//功能描述：用于存储Table中的一条记录
+//	//实现原理：用一个String的Vector以字符串格式一个一个地存储每个属性对应的值。
+//	public class tuple {
+//		public Vector<String> units;
+//		public tuple(Vector<String> units){
+//			this.units=units;
+//		}
+//		public tuple(){units = new Vector<String>();}
+//		public String getString(){
+//			StringBuffer sb = new StringBuffer();
+//			for(int i=0;i<units.size();i++){
+//				sb.append("\t"+units.get(i));
+//			}
+//			return sb.toString();
+//		}
+//	}
+	
+	public static void insertSingle(Table table, Tuple tup) {
+		String fileName = tableFileNameGet(table.TableName);
+		int TupSize = tup.size();
+		int MaxTupNum = BufferManager.Max_Block / TupSize;
+		Block b = BufferManager.FindBlock(fileName, 0);
+		int RowIndex = 0;
+		int Valid = b.GetInt(RowIndex * TupSize);
+		while(Valid != 0) {
+			if(RowIndex >= MaxTupNum) {
+				b = BufferManager.GetNextBlock(b);
+				RowIndex = 0;
+			}
+			RowIndex++;
+			Valid = b.GetInt(RowIndex * TupSize);
+		}
+		
+		b.WriteInt(1, RowIndex * TupSize);
+		b.WriteData(tup.data, TupSize - 4, RowIndex * TupSize + 4);
+	}
+	
+	public static void insert(Table table, List<Tuple> tups)
+	{
+		int N = tups.size();
+		for(int i=0; i<N; i++) {
+			insertSingle(table, tups.get(i));
+		}
+	}
+	
+	public static Vector<Tuple>selectSingleCondition(Table table, Condition condition){
 		return null;
 	}
 	
-	public static Vector<TableRow> select(Table table, List<Condition> conditions)
+	public static Vector<Tuple> select(Table table, List<Condition> conditions)
 	{
-		Vector<TableRow> Selected = null;
+		Vector<Tuple> Selected = null;
 		int N = conditions.size();
 		for(int i=0; i<N; i++) {
-			Vector<TableRow> Mid = selectSingleCondition(table, conditions.get(i));
+			Vector<Tuple> Mid = selectSingleCondition(table, conditions.get(i));
 			if(Selected!=null)
 				Selected.retainAll(Mid);
 			else
@@ -56,47 +103,20 @@ public class RecordManager {
 		return Selected;
 	}
 	
-	public static void insertSingle(Table table, TableRow Row) {
-		String fileName = tableFileNameGet(table.TableName);
-		int RowSize = Row.RowSize();
-		int MaxRowNum = BufferManager.Max_Block / (RowSize + 4);
-		Block b = BufferManager.FindBlock(fileName, 0);
-		int RowIndex = 0;
-		int Valid = b.GetInt(RowIndex * RowSize);
-		while(Valid != 0) {
-			if(RowIndex >= MaxRowNum) {
-				b = BufferManager.GetNextBlock(b);
-				RowIndex = 0;
-			}
-			Valid = b.GetInt(RowIndex * RowSize);
-		}
-		
-		b.WriteInt(1, RowIndex * RowSize);
-		b.WriteData(Row.toByte(), RowSize, RowIndex * RowSize + 4);
+	public static int deleteSingleCondition(Table table, Condition condition) {
+		return 0;
 	}
 	
-	public static void insert(Table table, List<TableRow> Rows)
+	public static int delete(Table table, List<Condition> conditions)
 	{
-		int N = Rows.size();
-		for(int i=0; i<N; i++) {
-			insertSingle(table, Rows.get(i));
-		}
+		int Sum = 0;
+		int N = conditions.size();
+		for(int i=0; i<N; i++)
+			Sum += deleteSingleCondition(table, conditions.get(i));
+		
+		return Sum;
 	}
-//	
-//	public static int delete(Table table, List<Condition> conditions)
-//	{
-//		return 0;
-//	}
-//	
-//	public static List<TableRow> select(List<Address> addr)
-//	{
-//		return null;
-//	}
-//	
-//	public static int delete(List<Address> addr)
-//	{
-//		return 0;
-//	}
+
 	
 	public static String tableFileNameGet(String filename)
 	{

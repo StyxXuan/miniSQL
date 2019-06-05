@@ -18,6 +18,7 @@ public class Attribute {
 	public void SetPrimary() {
 		this.isPrimary = true;
 	}
+	
 	public void SetUnique() {
 		this.isUnique = true;
 	}
