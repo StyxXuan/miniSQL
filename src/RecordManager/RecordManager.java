@@ -58,7 +58,7 @@ public class RecordManager {
 		}
 		
 		b.WriteInt(1, RowIndex * TupSize);
-		b.WriteData(tup.data, TupSize - 4, RowIndex * TupSize + 4);
+		b.WriteData(tup.GetBytes(), TupSize - 4, RowIndex * TupSize + 4);
 	}
 	
 	public static void insert(Table table, List<Tuple> tups)
@@ -70,6 +70,14 @@ public class RecordManager {
 	}
 	
 	public static Vector<Tuple>select(Table table, Condition condition){
+		String fileName = BufferManager.tableFileNameGet(table.TableName);
+		int TupSize = table.Row.size();
+		int MaxTupNum = BufferManager.Max_Block / TupSize;
+		
+		Block b = BufferManager.FindBlock(fileName, 0);
+//		while() {
+//			
+//		}
 		return null;
 	}
 	

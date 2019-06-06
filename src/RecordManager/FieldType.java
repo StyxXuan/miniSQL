@@ -1,5 +1,5 @@
 package RecordManager;
 
 public enum FieldType {
-	INT, FLOAT, STRING
+	INT, FLOAT, STRING, Empty
 }
