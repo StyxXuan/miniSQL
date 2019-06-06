@@ -73,11 +73,13 @@ public class RecordManager {
 		String fileName = BufferManager.tableFileNameGet(table.TableName);
 		int TupSize = table.Row.size();
 		int MaxTupNum = BufferManager.Max_Block / TupSize;
-		
+		int CountTup = 0;
 		Block b = BufferManager.FindBlock(fileName, 0);
-//		while() {
-//			
-//		}
+		while(CountTup  < table.RecordNum) {
+//			if()
+		}
+		
+		
 		return null;
 	}
 	

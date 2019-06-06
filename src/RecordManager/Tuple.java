@@ -34,4 +34,6 @@ public class Tuple {
 		
 		return data.getBytes();
 	}
+	
+//	public void GetTup
 }
