@@ -47,18 +47,19 @@ public class RecordManager {
 		// Find the free space
 		Block b = BufferManager.FindBlock(fileName, 0);
 		int RowIndex = 0;
-		int Valid = b.GetInt(RowIndex * TupSize);
+		int Valid = -1;
 		while(Valid != 0) {
 			if(RowIndex >= MaxTupNum) {
 				b = BufferManager.GetNextBlock(b);
 				RowIndex = 0;
 			}
-			RowIndex++;
 			Valid = b.GetInt(RowIndex * TupSize);
+			RowIndex++;
 		}
 		
 		b.WriteInt(1, RowIndex * TupSize);
 		b.WriteData(tup.GetBytes(), TupSize - 4, RowIndex * TupSize + 4);
+		table.RecordNum++;
 	}
 	
 	public static void insert(Table table, List<Tuple> tups)
@@ -69,18 +70,53 @@ public class RecordManager {
 		}
 	}
 	
+	@SuppressWarnings("null")
 	public static Vector<Tuple>select(Table table, Condition condition){
 		String fileName = BufferManager.tableFileNameGet(table.TableName);
 		int TupSize = table.Row.size();
 		int MaxTupNum = BufferManager.Max_Block / TupSize;
 		int CountTup = 0;
+		int RowIndex = 0;
+		Vector<Tuple>SelectedTups = null;
 		Block b = BufferManager.FindBlock(fileName, 0);
+		
 		while(CountTup  < table.RecordNum) {
-//			if()
+			if(RowIndex >= MaxTupNum) {
+				b = BufferManager.GetNextBlock(b);
+				RowIndex = 0;
+			}
+			if(b.GetInt(RowIndex * TupSize) != 0) {
+				CountTup++;
+				Tuple mid = new Tuple();
+				int AttIndex = 0;
+				for(int i=0; i<table.Row.attrinum; i++) {
+					switch(table.Row.attlist.get(i).Type) {
+					case FLOAT:
+						mid.Data.add(Float.toString(b.GetFloat(AttIndex)));
+						AttIndex += 4;
+						break;
+					case INT:
+						mid.Data.add(Integer.toString(b.GetInt(AttIndex)));
+						AttIndex += 4;
+						break;
+					case STRING:
+						mid.Data.add(b.GetString(AttIndex, table.Row.attlist.get(i).length));
+						AttIndex += table.Row.attlist.get(i).length;
+						break;
+					default:
+						break;
+					}
+				}
+				
+				if(condition.Satisfy(mid, table.Row)) {
+					SelectedTups.add(mid);
+				}
+			}
+			RowIndex++;
 		}
 		
 		
-		return null;
+		return SelectedTups;
 	}
 	
 	public static Vector<Tuple> select(Table table, List<Condition> conditions)
@@ -99,7 +135,50 @@ public class RecordManager {
 	}
 	
 	public static int delete(Table table, Condition condition) {
-		return 0;
+		String fileName = BufferManager.tableFileNameGet(table.TableName);
+		int TupSize = table.Row.size();
+		int MaxTupNum = BufferManager.Max_Block / TupSize;
+		int CountTup = 0;
+		int CountDelete = 0;
+		int RowIndex = 0;
+		Block b = BufferManager.FindBlock(fileName, 0);
+		
+		while(CountTup  < table.RecordNum) {
+			if(RowIndex >= MaxTupNum) {
+				b = BufferManager.GetNextBlock(b);
+				RowIndex = 0;
+			}
+			if(b.GetInt(RowIndex * TupSize) != 0) {
+				CountTup++;
+				Tuple mid = new Tuple();
+				int AttIndex = 0;
+				for(int i=0; i<table.Row.attrinum; i++) {
+					switch(table.Row.attlist.get(i).Type) {
+					case FLOAT:
+						mid.Data.add(Float.toString(b.GetFloat(AttIndex)));
+						AttIndex += 4;
+						break;
+					case INT:
+						mid.Data.add(Integer.toString(b.GetInt(AttIndex)));
+						AttIndex += 4;
+						break;
+					case STRING:
+						mid.Data.add(b.GetString(AttIndex, table.Row.attlist.get(i).length));
+						AttIndex += table.Row.attlist.get(i).length;
+						break;
+					default:
+						break;
+					}
+				}
+				
+				if(condition.Satisfy(mid, table.Row)) {
+					b.WriteInt(0, (RowIndex * TupSize));
+					CountDelete++;
+				}
+			}
+			RowIndex++;
+		}
+		return CountDelete;
 	}
 	
 	public static int delete(Table table, List<Condition> conditions)

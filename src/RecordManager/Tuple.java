@@ -27,6 +27,8 @@ public class Tuple {
 		return Data.get(index);
 	}
 	
+	
+	
 	public byte[] GetBytes() {
 		String data = "";
 		for(int i=0; i<Data.size(); i++)

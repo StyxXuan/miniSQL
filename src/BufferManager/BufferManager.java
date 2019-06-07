@@ -82,7 +82,13 @@ public class BufferManager {
 				return Buffer[i];
 		}
 		
-		return null;
+		int index = LRU();
+		if(!BufferReplace(index, file, offset)) {
+			System.out.println("Buffer replace error");
+			return null;
+		}
+		
+		return GetBlock(index);
 	}
 	
 	public static String tableFileNameGet(String filename)
