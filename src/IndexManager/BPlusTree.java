@@ -134,9 +134,9 @@ class TreeNode <T extends Comparable<T> >
         return newNode;
     }
     /*
-     *Add key-child pair to internal node
+     *Add key to internal node
      */
-    public int addKeyChild(T key, TreeNode<T> child)
+        public int addKey(T key)
     {
         int index = 0;
         Result<T> result = new Result<>();
@@ -148,8 +148,6 @@ class TreeNode <T extends Comparable<T> >
         if (numOfKeys == 0)
         {
             keys.setElementAt(key, 0);
-            children.setElementAt(child, 1);
-            child.parent = this;
             numOfKeys++;
             index = 0;
         }
@@ -157,21 +155,18 @@ class TreeNode <T extends Comparable<T> >
         {
             if (searchKey(key, result))
             {
+                index = -1;
                 System.out.println("Already existing key!");
             }
             else
             {
                 index = result.index;
-                children.setElementAt(children.get(numOfKeys), numOfKeys + 1);
                 for (int i = numOfKeys; i > index + 1; i--)
                 {
                     keys.setElementAt(keys.get(i - 1), i);
-                    children.setElementAt(children.get(i - 1), i);
                 }
                 keys.setElementAt(keys.get(index), index + 1);
                 keys.setElementAt(key, index);
-                children.setElementAt(child, index + 1);
-                child.parent = this;
                 numOfKeys++;
             }
         }
@@ -374,7 +369,14 @@ public class BPlusTree <T extends Comparable<T>>
         else
         {
             TreeNode<T> parent = node.parent;
-            parent.addKeyChild(result.key, newNode);
+            result.index = parent.addKey(result.key);
+            for (int i = parent.numOfKeys; i > result.index + 1; i--)
+            {
+                parent.children.setElementAt(parent.children.get(i - 1), i);
+            }
+            parent.children.setElementAt(newNode, result.index + 1);
+            newNode.parent = parent;
+            numOfNodes++;
             if (parent.numOfKeys == degree)
             {
                 insertAdjust(parent);
@@ -392,17 +394,15 @@ public class BPlusTree <T extends Comparable<T>>
         }
         if (findAtLeaf(root, key, result))
         {
-            int index = result.index;
-            if (index == 0 && result.resNode != headLeafNode)
+            if (result.index == 0 && result.resNode != headLeafNode)
             {
                 TreeNode<T> parent = result.resNode.parent;
                 int newIndex = -1;
                 while (parent != null)
                 {
-                    parent.searchKey(key, result);
-                    newIndex = result.index;
-                    if (newIndex >= 0)
+                    if (parent.searchKey(key, result))
                     {
+                        newIndex = result.index;
                         break;
                     }
                     parent = parent.parent;
@@ -530,16 +530,20 @@ public class BPlusTree <T extends Comparable<T>>
                 sibling = parent.children.get(index);
                 if (sibling.numOfKeys > midIndex)
                 {
-                    node.addKeyChild(parent.keys.get(index), sibling.children.get(sibling.numOfKeys));
+                    for (int i = node.numOfKeys + 1; i >= 1; i--)
+                    {
+                        node.children.setElementAt(node.children.get(i - 1), i);
+                    }
+                    node.children.setElementAt(sibling.children.get(sibling.numOfKeys), 0);
                     sibling.children.get(sibling.numOfKeys).parent = node;
-                    sibling.removeKey(sibling.numOfKeys);
+                    sibling.removeKey(sibling.numOfKeys - 1);
+                    node.addKey(parent.keys.get(index));
                     parent.keys.setElementAt(mostLeftKey(node), index);
                 }
                 else
                 {
                     sibling.keys.setElementAt(parent.keys.get(index), sibling.numOfKeys);
                     sibling.numOfKeys++;
-                    parent.removeKey(index);
                     for (int i = 0; i < node.numOfKeys; i++)
                     {
                         sibling.keys.setElementAt(node.keys.get(i), i + sibling.numOfKeys);
@@ -551,6 +555,7 @@ public class BPlusTree <T extends Comparable<T>>
                     node.children.get(node.numOfKeys).parent = sibling;
                     node = null;
                     numOfNodes--;
+                    parent.removeKey(index);
                     deleteAdjust(parent);
                 }
             }
@@ -566,9 +571,22 @@ public class BPlusTree <T extends Comparable<T>>
                 }
                 if (sibling.numOfKeys > midIndex)
                 {
-                    node.addKeyChild(parent.keys.get(index + 1), sibling.children.get(0));
+                    //Deal with the node
+                    if (parent.children.get(0) == node)
+                    {
+                        node.keys.setElementAt(parent.keys.get(0), node.numOfKeys);
+                    }
+                    else
+                    {
+                        node.keys.setElementAt(parent.keys.get(index + 1), node.numOfKeys);
+                    }
+                    node.children.setElementAt(sibling.children.get(0), node.numOfKeys + 1);
                     sibling.children.get(0).parent = node;
+                    node.numOfKeys++;
+                    //Deal with the sibling
+                    sibling.children.setElementAt(sibling.children.get(1), 0);
                     sibling.removeKey(0);
+                    //Deal with the parent
                     if (parent.children.get(0) == node)
                     {
                         parent.keys.setElementAt(mostLeftKey(sibling), 0);
@@ -580,17 +598,17 @@ public class BPlusTree <T extends Comparable<T>>
                 }
                 else
                 {
+                    //Deal with the node
                     if (parent.children.get(0) == node)
                     {
-                        parent.removeKey(0);
                         node.keys.setElementAt(parent.keys.get(0), node.numOfKeys);
                     }
                     else
                     {
-                        parent.removeKey(index + 1);
                         node.keys.setElementAt(parent.keys.get(index + 1), node.numOfKeys);
                     }
                     node.numOfKeys++;
+                    //Copy the keys and children
                     for (int i = 0; i < sibling.numOfKeys; i++)
                     {
                         node.keys.setElementAt(sibling.keys.get(i), i + node.numOfKeys);
@@ -601,6 +619,15 @@ public class BPlusTree <T extends Comparable<T>>
                     node.children.setElementAt(sibling.children.get(sibling.numOfKeys), node.numOfKeys);
                     sibling.children.get(sibling.numOfKeys).parent = node;
                     sibling = null;
+                    //Deal with the parent
+                    if (parent.children.get(0) == node)
+                    {
+                        parent.removeKey(0);
+                    }
+                    else
+                    {
+                        parent.removeKey(index + 1);
+                    }
                     numOfNodes--;
                     deleteAdjust(parent);
                 }
@@ -637,6 +664,11 @@ public class BPlusTree <T extends Comparable<T>>
 
     public void printTree()
     {
+        if (root == null)
+        {
+            System.out.println("Empty Tree!");
+            return;
+        }
         Vector< TreeNode<T> > queue = new Vector<>(degree); //Queue for node to be displayed
         int level = 0;
         TreeNode<T> node, headNode = root;
@@ -681,51 +713,28 @@ public class BPlusTree <T extends Comparable<T>>
 
     public static void main(String [] args)
     {
-        TreeNode.degree = 4;
-        BPlusTree<String> tree = new BPlusTree<>("", 10, 4);
-        tree.insert("Gold", 6);
+        TreeNode.degree = 5;
+        BPlusTree<String> tree = new BPlusTree<>("", 3, 6);
+        String s = "";
+        for (char ch1 = 'Z'; ch1 >= 'A'; ch1--)
+        {
+            for (char ch2 = 'A'; ch2 <= 'Z'; ch2++)
+            {
+                s = "" + ch1 + ch2;
+                tree.insert(s, tree.numOfNodes);
+            }
+        }
         tree.printTree();
 
-        tree.insert("Katz", 7);
+        for (char ch1 = 'Z'; ch1 >= 'A'; ch1--)
+        {
+            for (char ch2 = 'A'; ch2 <= 'Z'; ch2++)
+            {
+                s = "" + ch1 + ch2;
+                tree.delete(s);
+            }
+        }
         tree.printTree();
 
-        tree.insert("Kim", 8);
-        tree.printTree();
-
-        tree.insert("Mozart", 9);
-        tree.printTree();
-
-        tree.insert("Singh", 10);
-        tree.printTree();
-
-        tree.insert("Srinivasan", 11);
-        tree.printTree();
-        
-        tree.insert("Wu", 12);
-        tree.printTree();
-
-        tree.insert("Brandt", 1);
-        tree.printTree();
-
-        tree.insert("Califieri", 2);
-        tree.printTree();
-
-        tree.insert("Crick", 3);
-        tree.printTree();
-
-        tree.insert("Einstein", 4);
-        tree.printTree();
-
-        tree.insert("Elsaid", 5);
-        tree.printTree();
-
-        tree.delete("Srinivasan");
-        tree.printTree();
-        
-        tree.delete("Gold");
-        tree.printTree();
-
-        tree.delete("Brandt");
-        tree.printTree();
     }
 }
