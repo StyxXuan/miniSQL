@@ -63,8 +63,9 @@ public class BufferManager {
 		if(Buffer[index].isDirty) {
 			try {
 				Buffer[index].WriteBack();
-				Buffer[index].SetBlock(file, offset);
+				Buffer[index].SetBlock(file, offset - offset % Max_Block);
 				Buffer[index].LoadBlock();
+				Age[index] = (int)System.currentTimeMillis();
 			} catch (IOException e) {
 				return false;
 			}
@@ -76,13 +77,25 @@ public class BufferManager {
 		return Buffer[index];
 	}
 	
-	static public String FindAtt(Table table, String AttName, String file, int offset) {
-		return null;
+	static public String FindAtt(Table table, String field, String file, int offset) {
+		Block b = BufferManager.FindBlock(file, offset);
+		int length = -1, BlockOff = 0;
+		for(int i=0; i<table.Row.attrinum; i++){
+			if(table.Row.attlist.get(i).attriName == field) {
+				length = table.Row.attlist.get(i).length;
+				break;
+			}
+			BlockOff += table.Row.attlist.get(i).length;
+		}
+		if(length == -1) 
+			return "NotFound";
+		
+		return b.GetString(BlockOff, length);
 	}
 	
 	static public Block FindBlock(String file, int offset) {
 		for(int i=0; i<Max_Block; i++){
-			if(Buffer[i].file == file && Buffer[i].fileOffset == offset)
+			if(Buffer[i].file == file && Buffer[i].fileOffset <= offset && Buffer[i].fileOffset < offset + Max_Block)
 				return Buffer[i];
 		}
 		
@@ -97,11 +110,11 @@ public class BufferManager {
 	
 	public static String tableFileNameGet(String filename)
 	{
-		return "TABLE_FILE" + filename + ".miniSQL";
+		return "TABLE_FILE_" + filename + ".SQLTable";
 	}
 	
 	public static String indexFileNameGet(String filename)
 	{
-		return "INDEX_FILE" + filename + ".miniSQL";
+		return "INDEX_FILE_" + filename + ".SQLIndex";
 	}
 }

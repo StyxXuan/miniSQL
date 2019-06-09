@@ -9,9 +9,21 @@ import BufferManager.BufferManager;
 
 public class RecordManager {
 
-	public static boolean createTable(String Name, Vector<Attribute> Atts) {
-		
-		return false;
+	public static boolean createTable(String Name, List<Attribute> Atts) throws IOException {
+		TableRow NewRow = new TableRow(Atts, Atts.size());
+		Table NewTable = new Table(Name, NewRow);
+		String t_name = BufferManager.tableFileNameGet(NewTable.TableName);
+		File ft = new File(t_name);
+		if(ft.exists())
+		{
+			return false;	
+		}
+		ft.createNewFile();
+		Block b = BufferManager.FindBlock(t_name, 0);
+		b.WriteInt(0, 0);
+		b.isDirty = true;
+		BufferManager.tables.put(Name, NewTable);
+		return true;
 	}
 	
 	public static boolean createTable(Table table) throws IOException
@@ -27,6 +39,7 @@ public class RecordManager {
 		Block b = BufferManager.FindBlock(t_name, 0);
 		b.WriteInt(0, 0);
 		b.isDirty = true;
+		BufferManager.tables.put(table.TableName, table);
 		return true;
 	}
 	
@@ -124,8 +137,27 @@ public class RecordManager {
 		return SelectedTups;
 	}
 	
-	public static Vector<Tuple>select(String file, Vector<Integer>Offsets){
-		return null;
+	@SuppressWarnings("null")
+	public static Tuple select(Table table, int Offset){
+		Block b = BufferManager.FindBlock(BufferManager.tableFileNameGet(table.TableName), Offset);
+		Vector<String>Data = null;
+		List<Attribute> atts = table.Row.attlist;
+		for(int i=0; i<atts.size(); i++) {
+			String Att = b.GetString(Offset, atts.get(i).length);
+			Data.addElement(Att);
+		}
+		Tuple Selected = new Tuple(1, Data);
+		return Selected;
+	}
+	
+	@SuppressWarnings("null")
+	public static Vector<Tuple>select(Table table, Vector<Integer>Offsets){
+		Vector<Tuple>Res = null;
+		
+		for(int i=0; i<Offsets.size(); i++) {
+			Res.addElement(select(table, Offsets.get(i)));
+		}
+		return Res;
 	}
 	
 	public static Vector<Tuple> select(Table table, List<Condition> conditions)
