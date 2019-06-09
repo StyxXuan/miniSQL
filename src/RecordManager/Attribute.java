@@ -1,6 +1,8 @@
 package RecordManager;
 
 public class Attribute {
+//	static int AttSize = 100;
+	
 	public FieldType Type;
 	public String attriName;
 	public int length, offset;

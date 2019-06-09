@@ -76,6 +76,10 @@ public class BufferManager {
 		return Buffer[index];
 	}
 	
+	static public String FindAtt(Table table, String AttName, String file, int offset) {
+		return null;
+	}
+	
 	static public Block FindBlock(String file, int offset) {
 		for(int i=0; i<Max_Block; i++){
 			if(Buffer[i].file == file && Buffer[i].fileOffset == offset)

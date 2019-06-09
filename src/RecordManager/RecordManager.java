@@ -9,6 +9,10 @@ import BufferManager.BufferManager;
 
 public class RecordManager {
 
+	public static boolean createTable(String Name, Vector<Attribute> Atts) {
+		
+		return false;
+	}
 	
 	public static boolean createTable(Table table) throws IOException
 	{
@@ -61,6 +65,7 @@ public class RecordManager {
 		b.WriteData(tup.GetBytes(), TupSize - 4, RowIndex * TupSize + 4);
 		table.RecordNum++;
 	}
+	
 	
 	public static void insert(Table table, List<Tuple> tups)
 	{
@@ -117,6 +122,10 @@ public class RecordManager {
 		
 		
 		return SelectedTups;
+	}
+	
+	public static Vector<Tuple>select(String file, Vector<Integer>Offsets){
+		return null;
 	}
 	
 	public static Vector<Tuple> select(Table table, List<Condition> conditions)
