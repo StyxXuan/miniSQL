@@ -49,6 +49,10 @@ public class Condition
 		return res;
 	}
 	
+	public boolean Satisfy(String Key) {
+		return false;
+	}
+	
 	public boolean Satisfy(Tuple tup, TableRow Row, String Attribute, String Number, Operation Op){
 		FieldType Type = Row.GetType(Attribute);
 		boolean res = false;
