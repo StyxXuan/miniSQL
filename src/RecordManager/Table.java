@@ -12,4 +12,10 @@ public class Table {
 		this.Row = Row; 
 		this.RecordNum = 0;
 	}
+	
+	public Table(String TableName, TableRow Row, int RecNum) {
+		this.TableName = TableName; 
+		this.Row = Row; 
+		this.RecordNum = RecNum;
+	}
 }

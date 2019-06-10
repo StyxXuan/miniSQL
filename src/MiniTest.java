@@ -49,27 +49,33 @@ public class MiniTest {
 //			}
 //		}
 		
-		BufferManager.InitBuffer();
-//		Attribute Att = new Attribute(FieldType.INT, "NewInt");
-//		
-//		List<Attribute>Atts =  new ArrayList<Attribute>();;
-//		
-//		Atts.add(Att);
-//		
-//		RecordManager.createTable("NewOne", Atts);
-//		
-//		System.out.println("Create right");
-//		
-//		Table table = BufferManager.tables.get("NewOne");
-//		
-//		Vector<String>ATTs = new Vector<String>();
-//		ATTs.add("12345");
-//		
-//		Tuple tup = new Tuple(1, ATTs);
-//		
-//		RecordManager.insert(table, tup);
-//		
-//		System.out.println("insert right");
+		BufferManager.Init();
+		Attribute Att = new Attribute(FieldType.INT, "NewInt");
+		
+		List<Attribute>Atts =  new ArrayList<Attribute>();;
+		
+		Atts.add(Att);
+		
+		Attribute Anothe = new Attribute(FieldType.STRING, "NewString", 0, 25);
+		
+		Atts.add(Anothe);
+		
+		RecordManager.createTable("NewOne", Atts);
+		
+		System.out.println("Create right");
+		
+		Table table = BufferManager.tables.get("NewOne");
+		
+		Vector<String>ATTs = new Vector<String>();
+		ATTs.add("12345");
+		ATTs.add("sfesasf");
+		Atts.get(1).length = ATTs.get(1).length();
+		
+		Tuple tup = new Tuple(1, ATTs);
+		
+		RecordManager.insert(table, tup);
+		
+		System.out.println("insert right");
 		
 		System.out.println(BufferManager.tableFileNameGet("NewOne"));
 		
@@ -83,7 +89,7 @@ public class MiniTest {
 		
 		System.out.println("b.byte " + b.data[1]);
 		
-		BufferManager.FlushAll();
+		BufferManager.quit();
 		
 		System.out.println("FlushAll right");
 	}
