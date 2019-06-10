@@ -706,7 +706,7 @@ public class BPlusTree <T extends Comparable<T>>
     public void readFromBuffer(String fileName, FieldType type)
     {
         Block indexBlock = BufferManager.FindBlock(fileName, 0);
-        root = readFromBlock(null, null, indexBlock, type);
+        root = readFromBlock(null, indexBlock, type);
     }
 
     private TreeNode<T> readFromBlock(TreeNode<T> lastLeafNode, Block indexBlock, FieldType type)
