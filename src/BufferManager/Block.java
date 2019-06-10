@@ -17,7 +17,7 @@ public class Block {
 	public boolean isDirty = false;
 	public boolean isPined = false;
 	public boolean isValid = true;
-	byte[] data = new byte[Size];
+	public byte[] data = new byte[Size];
 	
 	public void SetBlock(String file, int fileOffset) {
 		this.file = file;
@@ -29,6 +29,7 @@ public class Block {
 		try {
 			File = new RandomAccessFile(file, "rw");
 			File.seek(fileOffset);
+//			System.out.println("fileOffset = " + fileOffset);
 			File.read(this.data, 0, Block.Size);
 		} catch (FileNotFoundException e) {
 			System.out.println("Error happened in openning the file");

@@ -33,12 +33,7 @@ public class TableRow {
 	public int size() {
 		int Size = 0;
 		for(int i=0; i<attlist.size(); i++) {
-			if(attlist.get(i).Type == FieldType.INT)
-				Size += 4;
-			else if(attlist.get(i).Type == FieldType.FLOAT)
-				Size += 4;
-			else if(attlist.get(i).Type == FieldType.STRING)
-				Size += attlist.get(i).length;
+			Size += attlist.get(i).length;
 		}
 		
 		return Size;

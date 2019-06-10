@@ -1,6 +1,7 @@
 package BufferManager;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 import RecordManager.Table;
@@ -16,16 +17,23 @@ public class BufferManager {
 	static public Map<String, Table> tables;
 	
 	static public void InitBuffer() {
+		tables = new HashMap<String, Table>();
 		for(int i=0; i<Max_Block; i++) {
 			Age[i] = 0;
 			Buffer[i] = new Block();
+			Buffer[i].isValid = false;
 		}
+	}
+	
+	static public void InitTables() {
+		
 	}
 	
 	static public void FlushAll() {
 		for(int i=0; i<Max_Block; i++) {
 			if(Buffer[i].isValid && Buffer[i].isDirty) {
 				try {
+					System.out.println("WriteBack " + i);
 					Buffer[i].WriteBack();
 				} catch (IOException e) {
 					System.out.println("Flush error");
@@ -50,6 +58,9 @@ public class BufferManager {
 		int index = -1;
 		int MIN = 10000;
 		for(int i=0; i<Max_Block; i++){
+			if(Buffer[i].isValid == false) {
+				return i;
+			}
 			if((Age[i] < MIN) && (!Buffer[i].isPined)) {
 				index = i;
 				MIN = Age[i];
@@ -60,16 +71,17 @@ public class BufferManager {
 	}
 	
 	static public boolean BufferReplace(int index, String file, int offset) {
-		if(Buffer[index].isDirty) {
-			try {
+		try {
+			if(Buffer[index].isDirty && Buffer[index].isValid) 
 				Buffer[index].WriteBack();
-				Buffer[index].SetBlock(file, offset - offset % Max_Block);
-				Buffer[index].LoadBlock();
-				Age[index] = (int)System.currentTimeMillis();
-			} catch (IOException e) {
-				return false;
-			}
+				
+			Buffer[index].SetBlock(file, offset - offset % Max_Block);
+			Buffer[index].LoadBlock();
+			Age[index] = (int)System.currentTimeMillis();
+		} catch (IOException e) {
+			return false;
 		}
+		
 		return true;
 	}
 	
@@ -100,6 +112,7 @@ public class BufferManager {
 		}
 		
 		int index = LRU();
+		System.out.println("index = " + index);
 		if(!BufferReplace(index, file, offset)) {
 			System.out.println("Buffer replace error");
 			return null;

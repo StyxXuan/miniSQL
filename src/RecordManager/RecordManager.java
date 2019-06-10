@@ -58,24 +58,28 @@ public class RecordManager {
 	
 	public static void insert(Table table, Tuple tup) {
 		String fileName = BufferManager.tableFileNameGet(table.TableName);
-		int TupSize = tup.size();
+		int TupSize = table.Row.size() + 4;
 		int MaxTupNum = BufferManager.Max_Block / TupSize;
 		
 		// Find the free space
 		Block b = BufferManager.FindBlock(fileName, 0);
 		int RowIndex = 0;
-		int Valid = -1;
+		int Valid = b.GetInt(RowIndex * TupSize);
 		while(Valid != 0) {
 			if(RowIndex >= MaxTupNum) {
 				b = BufferManager.GetNextBlock(b);
 				RowIndex = 0;
 			}
-			Valid = b.GetInt(RowIndex * TupSize);
 			RowIndex++;
+			Valid = b.GetInt(RowIndex * TupSize);
 		}
 		
 		b.WriteInt(1, RowIndex * TupSize);
-		b.WriteData(tup.GetBytes(), TupSize - 4, RowIndex * TupSize + 4);
+		System.out.println("b.read" + b.GetInt(RowIndex * TupSize));
+		b.isValid = true;
+		b.WriteData(tup.GetBytes(table), TupSize - 4, RowIndex * TupSize + 4);
+		System.out.println("b.read" + b.GetInt(RowIndex * TupSize + 4));
+		b.isDirty = true;
 		table.RecordNum++;
 	}
 	
@@ -88,14 +92,14 @@ public class RecordManager {
 		}
 	}
 	
-	@SuppressWarnings("null")
+
 	public static Vector<Tuple>select(Table table, Condition condition){
 		String fileName = BufferManager.tableFileNameGet(table.TableName);
 		int TupSize = table.Row.size();
 		int MaxTupNum = BufferManager.Max_Block / TupSize;
 		int CountTup = 0;
 		int RowIndex = 0;
-		Vector<Tuple>SelectedTups = null;
+		Vector<Tuple>SelectedTups = new Vector<Tuple>();
 		Block b = BufferManager.FindBlock(fileName, 0);
 		
 		while(CountTup  < table.RecordNum) {
@@ -137,10 +141,10 @@ public class RecordManager {
 		return SelectedTups;
 	}
 	
-	@SuppressWarnings("null")
+
 	public static Tuple select(Table table, int Offset){
 		Block b = BufferManager.FindBlock(BufferManager.tableFileNameGet(table.TableName), Offset);
-		Vector<String>Data = null;
+		Vector<String>Data = new Vector<String>();
 		List<Attribute> atts = table.Row.attlist;
 		for(int i=0; i<atts.size(); i++) {
 			String Att = b.GetString(Offset, atts.get(i).length);
@@ -150,9 +154,8 @@ public class RecordManager {
 		return Selected;
 	}
 	
-	@SuppressWarnings("null")
 	public static Vector<Tuple>select(Table table, Vector<Integer>Offsets){
-		Vector<Tuple>Res = null;
+		Vector<Tuple>Res = new Vector<Tuple>();
 		
 		for(int i=0; i<Offsets.size(); i++) {
 			Res.addElement(select(table, Offsets.get(i)));
@@ -162,7 +165,7 @@ public class RecordManager {
 	
 	public static Vector<Tuple> select(Table table, List<Condition> conditions)
 	{
-		Vector<Tuple> Selected = null;
+		Vector<Tuple> Selected = new Vector<Tuple>();
 		int N = conditions.size();
 		for(int i=0; i<N; i++) {
 			Vector<Tuple> Mid = select(table, conditions.get(i));

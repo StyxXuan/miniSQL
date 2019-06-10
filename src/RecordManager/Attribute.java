@@ -11,6 +11,8 @@ public class Attribute {
 	public Attribute(FieldType Type, String attriName) {
 		this.Type = Type;
 		this.attriName = attriName;
+		this.length = 4;
+		
 		this.isUnique = false;
 		this.isUnique = false;
 		this.hasIndex = false;
@@ -37,5 +39,6 @@ public class Attribute {
 	public void SetIndex() {
 		this.hasIndex = true;
 	}
+	
 	
 }
