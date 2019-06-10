@@ -196,6 +196,14 @@ public class BufferManager {
 		}
 	}
 	
+	static public void RemoveBlockFromBuffer(String FileName) {
+		for(int i=0; i<Max_Block; i++) {
+			if(Buffer[i].file == FileName) {
+				Buffer[i].isValid = false;
+			}
+		}
+	}
+	
 	static public Block GetNextBlock(Block b) {
 		return FindBlock(b.file, b.fileOffset + Max_Block);
 	}

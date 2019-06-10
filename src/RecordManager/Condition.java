@@ -6,7 +6,7 @@ import java.util.Vector;
 
 public class Condition
 {
-	enum Operation{
+	public enum Operation{
 		EQUAL, NOT_EQUAL, LESS, MORE, LESS_EQUAL, MORE_EQUAL;
 	}
 
