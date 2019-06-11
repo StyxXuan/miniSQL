@@ -55,6 +55,15 @@ public class RecordManager {
 		return ft.delete();
 	}
 	
+	public static boolean dropTable(String TableName) {
+		File ft = new File(TableName);
+		if(!ft.exists())
+			return false;
+		
+		BufferManager.RemoveBlockFromBuffer(TableName);
+		BufferManager.tables.remove(TableName);
+		return ft.delete();
+	}
 	
 	public static void insert(Table table, Tuple tup) {
 		String fileName = BufferManager.tableFileNameGet(table.TableName);

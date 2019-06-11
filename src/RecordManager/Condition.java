@@ -10,11 +10,11 @@ public class Condition
 		EQUAL, NOT_EQUAL, LESS, MORE, LESS_EQUAL, MORE_EQUAL;
 	}
 
-	Vector<String> Attributes;
-	Vector<String> Numbers;
+	public Vector<String> Attributes;
+	public Vector<String> Numbers;
 	
-	Vector<Operation> Ops;
-	Vector<String>Conjunctions;
+	public Vector<Operation> Ops;
+	public Vector<String>Conjunctions;
 	
 	public Condition(String AttName, String ToCampare, Operation Op) {
 		Attributes.addElement(AttName);

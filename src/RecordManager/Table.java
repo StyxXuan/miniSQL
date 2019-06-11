@@ -18,4 +18,8 @@ public class Table {
 		this.Row = Row; 
 		this.RecordNum = RecNum;
 	}
+	
+	public Attribute GetAttribute(String AttriName) {
+		return Row.GetAtt(AttriName);
+	}
 }
