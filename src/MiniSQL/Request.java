@@ -29,7 +29,7 @@ public class Request
 	Vector<String> attriSelect = new Vector<String>();
 	Vector<String> insertValue =  new Vector<String>();
 //	Vector<Condition> conditionVec = null;
-	Condition condition = new Condition();
+	Condition condition;
 	Vector<Attribute> attriVec = new Vector<Attribute>();
 	int primarykeylocation = -1;
 	boolean exit = false;
