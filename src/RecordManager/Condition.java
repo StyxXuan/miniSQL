@@ -7,14 +7,14 @@ import java.util.Vector;
 public class Condition
 {
 	public enum Operation{
-		EQUAL, NOT_EQUAL, LESS, MORE, LESS_EQUAL, MORE_EQUAL;
+		EQUAL, NOT_EQUAL, LESS, MORE, LESS_EQUAL, MORE_EQUAL, EMPTY;
 	}
 
-	public Vector<String> Attributes;
-	public Vector<String> Numbers;
+	public Vector<String> Attributes = new Vector<String>();
+	public Vector<String> Numbers = new Vector<String>();
 	
-	public Vector<Operation> Ops;
-	public Vector<String>Conjunctions;
+	public Vector<Operation> Ops = new Vector<Operation>();
+	public Vector<String>Conjunctions = new Vector<String>();
 	
 	public Condition(String AttName, String ToCampare, Operation Op) {
 		Attributes.addElement(AttName);
@@ -30,6 +30,10 @@ public class Condition
 		this.Conjunctions = Conjunctions;
 	}
 	
+	public Condition() {
+		// TODO 自动生成的构造函数存根
+	}
+
 	public boolean Satisfy(Tuple tup, TableRow Row) {
 		int index = 0;
 		if(Attributes.size() == 0)
@@ -47,10 +51,6 @@ public class Condition
 			index++;
 		}
 		return res;
-	}
-	
-	public boolean Satisfy(String Key) {
-		return false;
 	}
 	
 	public boolean Satisfy(Tuple tup, TableRow Row, String Attribute, String Number, Operation Op){
