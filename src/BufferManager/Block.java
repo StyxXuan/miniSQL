@@ -11,7 +11,7 @@ import java.io.RandomAccessFile;
 
 
 public class Block {
-	static int Size = 4096;
+	public static int Size = 4096;
 	String file = "";
 	public int fileOffset = 0;
 	public boolean isDirty = false;
