@@ -8,15 +8,29 @@ import RecordManager.FieldType;
 
 public class Interpreter{
 	static int index = 0;
-	
+	/*
+	 * create table student (sno char(8), sname char(16) unique, sage int, sgender char (1),primary key ( sno ));
+	 */
+    public static void main(String []args)
+	{
+		String word = "create table student (sno char(8), sname char(16) unique, sage int, sgender char (1),primary key ( sno ));";
+		Request r = parse(word);
+///		for(int i = 0; i < 4; i++)
+	//		System.out.println(r.insertValue.elementAt(i));
+	}
 	public Interpreter(String sql)
 	{
 		Request r = parse(sql);
-		excute(r);
+		if(r != null)
+		{
+			Response result = excute(r);
+			result.PrintInfor();
+		}
 	}
 	
+	@SuppressWarnings("null")
 	public static Request parse(String sql) {
-		Vector<String> parses = null;
+		Vector<String> parses = new Vector<String>();
 		String word;
 		word = getWord(sql);
 		//create table or index
@@ -34,14 +48,14 @@ public class Interpreter{
 				}
 				else
 				{
-					//Error
+					System.out.println("Syntax Error: no table name!");
 					index = 0;
 					return null;
 				}
 				word = getWord(sql);
-				if(word != "(")
+				if(!word.equals("("))
 				{
-					//Error
+					System.out.println("Error int syntax");
 					index = 0;
 					return null;
 				}
@@ -49,11 +63,11 @@ public class Interpreter{
 				{
 					int len = 100; //length of string
 					word = getWord(sql);
-					Vector<Attribute> attriVec = null;
+					Vector<Attribute> attriVec = new Vector<Attribute>();
 					while(!word.equals("primary") && !word.equals(")"))
 					{
 						String attributename = word;
-						FieldType type;
+						FieldType type = FieldType.Empty;
 						boolean isUnique = false;
 						word = getWord(sql);
 						if(word.equals("int"))
@@ -85,6 +99,7 @@ public class Interpreter{
 						}
 						else
 						{
+							System.out.println("Syntax Error: unkonwn data type");
 							index = 0;
 							return null;
 							//Error
@@ -103,7 +118,7 @@ public class Interpreter{
 						{
 							if(!word.equals(")"))
 							{
-								//Error
+								System.out.println("Syntax Error: invalid ues of ','!");
 								index = 0;
 								return null;
 							}
@@ -116,6 +131,7 @@ public class Interpreter{
 						word = getWord(sql);
 						if(!word.equals("key"))
 						{
+							System.out.println("Error in syntax");
 							index = 0;
 							return null;
 							//Error
@@ -123,36 +139,50 @@ public class Interpreter{
 						else
 						{
 							word = getWord(sql);
-							primarykey = word;
-							int i;
-							for(i = 0; i < attriVec.size(); i++)
+							if(!word.equals("("))
 							{
-								if(primarykey.equals(attriVec.get(i).attriName))
-								{
-									attriVec.get(i).SetPrimary();
-									attriVec.get(i).SetUnique();
-									break;
-								}
-							}
-							if(i == attriVec.size())
-							{
-								index = 0; 
-								return null;
-								//Error
-							}
-							primarylocation = i;
-							word = getWord(sql);
-							if(!word.equals(")"))
-							{
+								System.out.println("Error in syntax");
 								index = 0;
 								return null;
 								//Error
+							}
+							else
+							{
+								word = getWord(sql);
+								primarykey = word;
+								int i;
+								for(i = 0; i < attriVec.size(); i++)
+								{
+									if(primarykey.equals(attriVec.get(i).attriName))
+									{
+										attriVec.get(i).SetPrimary();
+										attriVec.get(i).SetUnique();
+										break;
+									}
+								}
+								if(i == attriVec.size())
+								{
+									System.out.println("Syntax Error: primaryKey doesn't exist in attriubtes!");
+									index = 0; 
+									return null;
+									//Error
+								}
+								primarylocation = i;
+								word = getWord(sql);
+								if(!word.equals(")"))
+								{
+									System.out.println("Error in syntax");
+									index = 0;
+									return null;
+									//Error
+								}
 							}
 						}
 					}
 					else
 					{
 						//Error
+						System.out.println("Error in syntax");
 						index = 0;
 						return null;
 					}
@@ -173,12 +203,14 @@ public class Interpreter{
 				else
 				{
 					//Error
+					System.out.println("Error in syntax");
 					index = 0;
 					return null;
 				}
 				
 				if(!(word = getWord(sql)).equals("on"))
 				{
+					System.out.println("Error in syntax");
 					index = 0;
 					return null;
 				}
@@ -186,6 +218,7 @@ public class Interpreter{
 				tablename = word;
 				if(!(word = getWord(sql)).equals("("))
 				{
+					System.out.println("Error in syntax");
 					index = 0;
 					return null;
 				}
@@ -193,6 +226,7 @@ public class Interpreter{
 				attributename = word;
 				if(!(word = getWord(sql)).equals(")"))
 				{
+					System.out.println("Error in syntax");
 					index = 0;
 					return null;
 				}
@@ -217,11 +251,13 @@ public class Interpreter{
 			String tablename = "";
 			if(!(word = getWord(sql)).equals("*"))
 			{
+				System.out.println("Error in syntax");
 				index = 0;
 				return null;
 			}
 			if(!(word = getWord(sql)).equals("from"))
 			{
+				System.out.println("Error in syntax");
 				index = 0;
 				return null;
 			}
@@ -236,10 +272,10 @@ public class Interpreter{
 			}
 			else if(word.equals("where"))
 			{
-				Vector<String> attributename = null;
-				Vector<String> toCompare = null;
-				Vector<Operation> ops = null;
-				Vector<String> conjunction = null;
+				Vector<String> attributename = new Vector<String>();
+				Vector<String> toCompare = new Vector<String>();
+				Vector<Operation> ops = new Vector<Operation>();
+				Vector<String> conjunction = new Vector<String>();
 				word = getWord(sql);
 				while(!word.isEmpty())
 				{
@@ -308,6 +344,7 @@ public class Interpreter{
 				}
 				else
 				{
+					System.out.println("Syntax Error: no table name!");
 					index = 0;
 					return null;
 					//Error
@@ -317,46 +354,17 @@ public class Interpreter{
 			else if(word.equals("index"))
 			{
 				String indexname = "";
-				String tablename = "";
-				String attriname = "";
 				word = getWord(sql);
 				if(!word.isEmpty())
 				{
-					index = 0;
 					indexname = word;
 					parses.addElement(indexname);
-					word = getWord(sql);
-					if(word.equals("on"))
-					{
-						word = getWord(sql);
-						if(!word.isEmpty())
-						{
-							tablename = word;
-							parses.addElement(tablename);
-						}
-						word = getWord(sql);
-						if(word.equals("("))
-						{
-							word = getWord(sql);
-							if(!word.isEmpty())
-							{
-								attriname = word;
-								parses.addElement(attriname);
-							}	
-						}
-						word = getWord(sql);
-						if(!word.equals(")"))
-						{
-							index = 0;
-							return null;
-							//Error
-						}
-					}
 					Request r = new Request(6, parses, null, null, 0);
 					return r;
 				}
 				else
 				{
+					System.out.println("Error in syntax");
 					index = 0;
 					return null;
 					//Error
@@ -364,6 +372,7 @@ public class Interpreter{
 			}
 			else
 			{
+				System.out.println("Error in syntax");
 				index = 0;
 				return null;
 				//Error
@@ -378,6 +387,7 @@ public class Interpreter{
 			word = getWord(sql);
 			if(!word.equals("into"))
 			{
+				System.out.println("Error in syntax");
 				index = 0;
 				return null;
 				//Error
@@ -391,6 +401,7 @@ public class Interpreter{
 			word = getWord(sql);
 			if(!word.equals("values"))
 			{
+				System.out.println("Error in syntax");
 				index = 0;
 				return null;
 				//Error
@@ -398,6 +409,7 @@ public class Interpreter{
 			word = getWord(sql);
 			if(!word.equals("("))
 			{
+				System.out.println("Error in syntax");
 				index = 0;
 				return null;
 				//Error
@@ -413,6 +425,7 @@ public class Interpreter{
 			}
 			if(!word.equals(")"))
 			{
+				System.out.println("Error in syntax");
 				index = 0;
 				return null;
 				//Error
@@ -428,17 +441,20 @@ public class Interpreter{
 			word = getWord(sql);
 			if(!word.equals("from"))
 			{
+				System.out.println("Error in syntax");
 				index = 0;
+				return null;
 				//Error
 			}
 			word = getWord(sql);
 			if(!word.isEmpty())
 			{
-				parses.addElement(tablename);
 				tablename = word;
+				parses.addElement(tablename);
 			}
 			else
 			{
+				System.out.println("Error in syntax");
 				index = 0;
 				return null;
 				//Error
@@ -451,10 +467,10 @@ public class Interpreter{
 			}
 			else if(word.equals("where"))
 			{
-				Vector<String> attributename = null;
-				Vector<String> toCompare = null;
-				Vector<Operation> ops = null;
-				Vector<String> conjunction = null;
+				Vector<String> attributename = new Vector<String>();
+				Vector<String> toCompare = new Vector<String>();
+				Vector<Operation> ops = new Vector<Operation>();
+				Vector<String> conjunction = new Vector<String>();
 				word = getWord(sql);
 				while(!word.isEmpty())
 				{
@@ -488,6 +504,7 @@ public class Interpreter{
 						break;
 					default:
 						//Error
+						System.out.println("Error in syntax");
 						index = 0;
 						return null;
 					}
@@ -522,6 +539,7 @@ public class Interpreter{
 		}
 		else
 		{
+			System.out.println("Error in syntax");
 			index = 0;
 			return null;
 			//Error	
@@ -530,8 +548,9 @@ public class Interpreter{
 		return null;
 	}
 	
-	public static void excute(Request request) 
+	public static Response excute(Request request) 
 	{
+		double startTime = System.currentTimeMillis();
 		switch(request.type)
 		{
 		case 1:
@@ -561,14 +580,16 @@ public class Interpreter{
 			//Exit
 			break;
 		case 11:
-			//Excute file
+			//Execute file
 			break;
 		}
+		double endTime = System.currentTimeMillis();
+		Response re = new Response(true, endTime - startTime);
+		return re;
 	}
 	
 	static String getWord(String sql)
 	{
-		sql = sql.toLowerCase();
 		int i;
 		String word = "";
 		int idx1, idx2;
