@@ -2,6 +2,7 @@ package MiniSQL;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 
 import RecordManager.*;
 import IndexManager.*;
@@ -52,22 +53,41 @@ public class API{
 		boolean Aff = true;
 		double Time = 0;
 		long startTime = System.currentTimeMillis();
+		Table table = BufferManager.tables.get(request.tablename);
+		Vector<Tuple> Datas = new Vector<Tuple>();
 		if(request.condition.Attributes.size() == 1 && request.condition.Ops.get(0) == Condition.Operation.EQUAL){
-			Table table = BufferManager.tables.get(request.tablename);
 			Attribute Att = table.GetAttribute(request.condition.Attributes.get(0));
 			int FileOff = IndexManager.select(table, Att, request.condition.Numbers.get(0));
+			Tuple tup = RecordManager.select(table, FileOff);
+			Datas.add(tup);
 		}else {
-			
+			Datas.retainAll(RecordManager.select(table, request.condition));
 		}
-		return null;
+		long endTime = System.currentTimeMillis();
+		Time =  endTime - startTime;
+		Response Res = new Response(Aff, Time, Datas);
+		return Res;
 	}
 	
 	static public Response insert(Request request) {
+		boolean Aff = true;
+		double Time = 0;
+		Table table = BufferManager.tables.get(request.tablename);
+//		request.
+//		RecordManager.insert(table, tups);
 		return null;
 	}
 	
 	static public Response delete(Request request) {
-		return null;
+		boolean Aff = true;
+		double Time = 0;
+		long startTime = System.currentTimeMillis();
+		Table table = BufferManager.tables.get(request.tablename);
+		RecordManager.delete(table, request.condition);
+		long endTime = System.currentTimeMillis();
+		Time = endTime - startTime;
+		Response Res = new Response(Aff, Time);
+		return Res;
 	}
 
 }
