@@ -8,16 +8,6 @@ import RecordManager.FieldType;
 
 public class Interpreter{
 	static int index = 0;
-	/*
-	 * create table student (sno char(8), sname char(16) unique, sage int, sgender char (1),primary key ( sno ));
-	 */
-    public static void main(String []args)
-	{
-		String word = "create table student (sno char(8), sname char(16) unique, sage int, sgender char (1),primary key ( sno ));";
-		Request r = parse(word);
-///		for(int i = 0; i < 4; i++)
-	//		System.out.println(r.insertValue.elementAt(i));
-	}
 	public Interpreter(String sql)
 	{
 		Request r = parse(sql);
@@ -27,7 +17,17 @@ public class Interpreter{
 			result.PrintInfor();
 		}
 	}
-	
+	public static void resultPrint(Request request, Response response)
+	{
+		if(response.Tups.isEmpty())
+		{
+			response.PrintInfor();
+		}
+		else
+		{
+			response.PrintInfo(response.table);
+		}
+	}
 	@SuppressWarnings("null")
 	public static Request parse(String sql) {
 		Vector<String> parses = new Vector<String>();
@@ -268,6 +268,7 @@ public class Interpreter{
 			if((word = getWord(sql)).isEmpty())
 			{
 				Request r = new Request(3, parses, null, null, 0);
+				index = 0;
 				return r;
 			}
 			else if(word.equals("where"))
@@ -360,6 +361,7 @@ public class Interpreter{
 					indexname = word;
 					parses.addElement(indexname);
 					Request r = new Request(6, parses, null, null, 0);
+					index = 0;
 					return r;
 				}
 				else
@@ -463,6 +465,7 @@ public class Interpreter{
 			if(word.isEmpty())
 			{
 				Request r = new Request(8, parses, null, null, 0);
+				index = 0;
 				return r;
 			}
 			else if(word.equals("where"))
