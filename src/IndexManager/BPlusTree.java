@@ -2,7 +2,7 @@ package IndexManager;
 
 import java.util.Vector;
 import java.lang.String;
-import BufferManager.Block;
+import RecordManager.FieldType;
 
 enum NodeType
 {
@@ -23,6 +23,11 @@ class TreeNode <T extends Comparable<T> >
     public Vector <T> keys;                 //Search keys
     public Vector < TreeNode<T> > children; //Children nodes
     public Vector <Integer> values;         //Value:in-block address
+
+    public void setKeyAt(T key, int index)
+    {
+        keys.setElementAt(key, index);
+    }
 
     public TreeNode(NodeType nodeType)
     {
@@ -139,7 +144,7 @@ class TreeNode <T extends Comparable<T> >
     public int addKey(T key)
     {
         int index = 0;
-        Result<T> result = new Result<>();
+        Result<T> result = new Result<T>();
         if (nodeType != NodeType.INTERNAL)
         {
             System.out.println("Add key into an non-internal node!");
@@ -176,7 +181,7 @@ class TreeNode <T extends Comparable<T> >
     public int addKeyValue(T key, int value)
     {
         int index = 0;
-        Result<T> result = new Result<>();
+        Result<T> result = new Result();
         if (nodeType != NodeType.LEAF)
         {
             System.out.println("Add key-value into an non-leaf node!");
@@ -257,17 +262,20 @@ public class BPlusTree <T extends Comparable<T>>
     public int keySize;
     public int height;
     public int numOfNodes;
-    public String filePath;
+    public FieldType keyType;
+    public String fileName;
     public TreeNode<T> root;
     public TreeNode<T> headLeafNode;
+    private TreeNode<T> lastLeafNode;
 
-    public BPlusTree(String filePath, int keySize, int degree)
+    public BPlusTree(String fileName, int keySize, int degree, FieldType keyType)
     {
-        this.filePath = filePath;
+        this.fileName = fileName;
         this.keySize = keySize;
+        this.keyType = keyType;
         this.degree = TreeNode.degree = degree;
         numOfNodes = height = 0;
-        root = headLeafNode = null;
+        root = headLeafNode = lastLeafNode = null;
     }
 
     public boolean findAtLeaf(TreeNode<T> node, T key, Result<T> result)
@@ -310,7 +318,7 @@ public class BPlusTree <T extends Comparable<T>>
 
     public int search(T key)
     {
-        Result<T> result = new Result<>();
+        Result<T> result = new Result<T>();
         if (findAtLeaf(root, key, result))
         {
             return result.resNode.values.get(result.index);
@@ -323,10 +331,10 @@ public class BPlusTree <T extends Comparable<T>>
 
     public boolean insert(T key, int value)
     {
-        Result<T> result = new Result<>();
+        Result<T> result = new Result<T>();
         if (root == null)
         {
-            root = new TreeNode<>(NodeType.LEAF);
+            root = new TreeNode<T>(NodeType.LEAF);
             root.keys.setElementAt(key, 0);
             root.values.setElementAt(value, 0);
             root.numOfKeys = 1;
@@ -352,12 +360,12 @@ public class BPlusTree <T extends Comparable<T>>
 
     public void insertAdjust(TreeNode<T> node)
     {
-        Result<T> result = new Result<>();
+        Result<T> result = new Result<T>();
         TreeNode<T> newNode = node.splitNode(result);
         numOfNodes++;
         if (node == root)
         {
-            root = new TreeNode<>(NodeType.INTERNAL);
+            root = new TreeNode<T>(NodeType.INTERNAL);
             root.children.setElementAt(node, 0);
             root.children.setElementAt(newNode, 1);
             root.keys.setElementAt(result.key, 0);
@@ -386,7 +394,7 @@ public class BPlusTree <T extends Comparable<T>>
 
     public void delete(T key)
     {
-        Result<T> result = new Result<>();
+        Result<T> result = new Result<T>();
         if (root == null)
         {
             System.out.println("Empty tree!");
@@ -426,7 +434,7 @@ public class BPlusTree <T extends Comparable<T>>
     {
         int midIndex = (degree - 1) / 2, index = 0;
         TreeNode<T> parent = node.parent, sibling = null;
-        Result<T> result = new Result<>();
+        Result<T> result = new Result<T>();
         if (node == root)
         {
             if (node.numOfKeys > 0)
@@ -703,165 +711,44 @@ public class BPlusTree <T extends Comparable<T>>
         System.out.println("\n-----------------------------------");
     }
 
-    public void readFromBuffer(String fileName, FieldType type)
+    /*
+    public Block getBlock(TreeNode<T> node, TreeNode<T> pNode)
     {
-        Block indexBlock = BufferManager.FindBlock(fileName, 0);
-        root = readFromBlock(null, indexBlock, type);
-    }
-
-    private TreeNode<T> readFromBlock(TreeNode<T> lastLeafNode, Block indexBlock, FieldType type)
-    {
-        int address = 0, offset = 0;
-        TreeNode<T> node = null, child = null;
-        T key;
-        if (indexBlock.GetInt(0) == 0)  //leaf node
+        static int count = 0;
+        Block indexBlock;
+        if (node == pNode)
         {
-            node = new TreeNode<>(NodeType.LEAF);
-            node.numOfKeys = indexBlock.GetInt(4);
-            offset += 8;
-            for (int i = 0; i < node.numOfKeys; i++)
+            return BufferManager.FindBlock(this.fileName, count * Block.Size);
+        }
+        else
+        {
+            count++;
+            if (pNode.nodeType == NodeType.LEAF)
             {
-                switch (type)
-                {
-                    case INT:
-                        key = indexBlock.GetInt(offset);
-                        break;
-                    case FLOAT:
-                        key = indexBlock.GetFloat(offset);
-                        break;
-                    case STRING:
-                        key = indexBlock.GetString(offset);
-                        break;
-                    default:
-                        System.out.println("Read error!");
-                        return;
-                }
-                node.keys.setElementAt(key, i);
-                address = indexBlock.GetInt(offset + keySize);
-                node.values.setElementAt(address, i);
-                offset += keySize + 4;
-            }
-            if (lastLeafNode == null)
-            {
-                headLeafNode = node;
+                return null;
             }
             else
             {
-                lastLeafNode.nextLeafNode = node;
-            }
-        }
-        else
-        {
-            node = new TreeNode<>(NodeType.INTERNAL);
-            node.numOfKeys = indexBlock.GetInt(4);
-            offset += 8;
-            for (int i = 0; i < node.numOfKeys; i++)
-            {
-                switch (type)
+                for (int i = 0; i <= pNode.numOfKeys; i++)
                 {
-                    case INT:
-                        key = indexBlock.GetInt(offset);
-                        break;
-                    case FLOAT:
-                        key = indexBlock.GetFloat(offset);
-                        break;
-                    case STRING:
-                        key = indexBlock.GetString(offset);
-                        break;
-                    default:
-                        System.out.println("Read error!");
-                        return;
+                    indexBlock = getBlock(node, node.children.get(i));
+                    if (indexBlock != null)
+                    {
+                        return indexBlock;
+                    }
                 }
-                node.keys.setElementAt(key, i);
-                offset += keySize;
-            }
-            for (int i = 0; i <= node.numOfKeys; i++)
-            {
-                indexBlock = BufferManager.GetNextBlock(indexBlock);
-                child = readFromBlock(null, indexBlock, type);
-                child.parent = node;
-                node.children.setElementAt(child, i);
-            }
-        }
-        numOfNodes++;
-        return node;
-    }
-
-    public void writeToBuffer(String fileName, FieldType type)
-    {
-        Block indexBlock = BufferManager.FindBlock(fileName, 0);
-        writeToBlock(root, indexBlock, type);
-    }
-
-    private void writeToBlock(TreeNode<T> node, Block indexBlock, FieldType type)
-    {
-        int offset = 0;
-        if (node == null)
-        {
-            return;
-        }
-        else if (node.nodeType == NodeType.LEAF)
-        {
-            indexBlock.WriteInt(0, offset);  //0 for leaf node
-            indexBlock.WriteInt(node.numOfKeys, offset);  //size
-            offset += 2 * Integer.SIZE / 8;
-            for (int i = 0; i < node.numOfKeys; i++)
-            {
-                switch (type)
-                {
-                    case INT:
-                        indexBlock.WriteInt(node.keys.get(i), offset);
-                        break;
-                    case FLOAT:
-                        indexBlock.WriteFLOAT(node.keys.get(i), offset);
-                        break;
-                    case STRING:
-                        indexBlock.WriteInt(node.keys.get(i), offset);
-                        break;
-                    default:
-                        System.out.println("Write error!");
-                        return;
-                }
-                indexBlock.WriteInt(node.values.get(i), offset + keySize);
-                offset += keySize + Integer.SIZE / 8;
-            }
-        }
-        else
-        {
-            indexBlock.WriteInt(1, offset);  //1 for internal node
-            indexBlock.WriteInt(node.numOfKeys, offset);  //size
-            offset += 2 * Integer.SIZE / 8;
-            for (int i = 0; i < node.numOfKeys; i++)
-            {
-                switch (type)
-                {
-                    case INT:
-                        indexBlock.WriteInt(node.keys.get(i), offset);
-                        break;
-                    case FLOAT:
-                        indexBlock.WriteFLOAT(node.keys.get(i), offset);
-                        break;
-                    case STRING:
-                        indexBlock.WriteInt(node.keys.get(i), offset);
-                        break;
-                    default:
-                        System.out.println("Write error!");
-                        return;
-                }
-                offset += keySize;
-            }
-            for (int i = 0; i <= node.numOfKeys; i++)
-            {
-                indexBlock = BufferManager.GetNextBlock(indexBlock);
-                writeToBlock(node.children.get(i), indexBlock, type);
+                return null;
             }
         }
     }
+    */
 
+    /*
     public static void main(String [] args)
     {
         TreeNode.degree = 5;
-        BPlusTree<String> tree = new BPlusTree<>("", 3, 6);
+        BPlusTree<String> tree = new BPlusTree<String>("", 3, 6, FieldType.INT);
+
         String s = "";
 
         for (char ch1 = 'Z'; ch1 >= 'A'; ch1--)
@@ -873,7 +760,6 @@ public class BPlusTree <T extends Comparable<T>>
             }
         }
         tree.printTree();
-
         for (char ch1 = 'Z'; ch1 >= 'A'; ch1--)
         {
             for (char ch2 = 'A'; ch2 <= 'Z'; ch2++)
@@ -885,5 +771,5 @@ public class BPlusTree <T extends Comparable<T>>
         tree.printTree();
 
     }
-
+    */
 }
