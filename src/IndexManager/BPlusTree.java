@@ -266,7 +266,7 @@ public class BPlusTree <T extends Comparable<T>>
     public String fileName;
     public TreeNode<T> root;
     public TreeNode<T> headLeafNode;
-    private TreeNode<T> lastLeafNode;
+    public TreeNode<T> lastLeafNode;
 
     public BPlusTree(String fileName, int keySize, int degree, FieldType keyType)
     {
