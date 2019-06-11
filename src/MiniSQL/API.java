@@ -83,6 +83,7 @@ public class API{
 		double Time = 0;
 		long startTime = System.currentTimeMillis();
 		Table table = BufferManager.tables.get(request.tablename);
+//		IndexManager.delete(table, attribute, key)
 		RecordManager.delete(table, request.condition);
 		long endTime = System.currentTimeMillis();
 		Time = endTime - startTime;
