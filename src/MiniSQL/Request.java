@@ -21,16 +21,16 @@ import RecordManager.Attribute;
 public class Request 
 {	
 	public int type = 0;
-	String file2excute = null;
-	String tablename = null;
-	String primarykey = null;
-	String indexname = null;
-	String attributename = null;
-	Vector<String> attriSelect = null;
-	Vector<String> insertValue = null;
+	String file2excute = "";
+	String tablename = "";
+	String primarykey = "";
+	String indexname = "";
+	String attributename = "";
+	Vector<String> attriSelect = new Vector<String>();
+	Vector<String> insertValue =  new Vector<String>();
 //	Vector<Condition> conditionVec = null;
-	Condition condition = null;
-	Vector<Attribute> attriVec = null;
+	Condition condition = new Condition();
+	Vector<Attribute> attriVec = new Vector<Attribute>();
 	int primarykeylocation = -1;
 	boolean exit = false;
 	
@@ -66,8 +66,6 @@ public class Request
 			break;
 		case 6:
 			this.indexname = parses.elementAt(0);
-			this.tablename = parses.elementAt(1);
-			this.attributename = parses.elementAt(2);
 			break;
 		case 7:
 			this.tablename = parses.elementAt(0);
