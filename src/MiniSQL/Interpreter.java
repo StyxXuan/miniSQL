@@ -16,9 +16,21 @@ public class Interpreter{
 	 * insert into student values('12345678', '1234567890123456', 10, '1');
 	 * drop table student;
 	 * delete from student where sno = '12345678';
+	 * select * from student;
+	 * select * from student where sno = '12345678';
+	 * select * from student where sno = '12345678' and sage = 5;
 	 */
 
-	
+/*	public static void main(String[] args)
+	{
+		System.out.println("here");
+		String sql = "select * from student;";
+		String sql2 = "insert into student values('12345678', '1234567890123456', 10, '1');";
+		Request r = parse(sql);
+		System.out.println(r.tablename);
+		Request r2 = parse(sql2);
+		System.out.println(r2.tablename + " " + r2.insertValue.elementAt(0));
+	}*/
 	
 	static public Request parse(String sql) {
 		Vector<String> parses = new Vector<String>();
@@ -52,7 +64,7 @@ public class Interpreter{
 				}
 				else
 				{
-					int len = 100; //length of string
+					int len = 0; //length of string
 					word = getWord(sql);
 					Vector<Attribute> attriVec = new Vector<Attribute>();
 					while(!word.equals("primary") && !word.equals(")"))
@@ -101,7 +113,11 @@ public class Interpreter{
 							isUnique = true;
 							word = getWord(sql);
 						}
-						Attribute attri = new Attribute(type, attributename, len, 0);
+						Attribute attri;
+						if(type == FieldType.STRING)
+							attri = new Attribute(type, attributename, len, 0);
+						else
+							attri = new Attribute(type, attributename);
 						if(isUnique)
 							attri.SetUnique();
 						attriVec.add(attri);
@@ -258,6 +274,7 @@ public class Interpreter{
 			Condition condition = null;
 			if((word = getWord(sql)).isEmpty())
 			{
+				index = 0;
 				Request r = new Request(3, parses, null, null, 0);
 				return r;
 			}
@@ -312,6 +329,7 @@ public class Interpreter{
 				}
 				condition = new Condition(attributename, toCompare, ops, conjunction);
 				Request r = new Request(4, parses, condition, null, 0);
+				index = 0;
 				return r;
 			}
 			index = 0;
@@ -348,6 +366,7 @@ public class Interpreter{
 				word = getWord(sql);
 				if(!word.isEmpty())
 				{
+					index = 0;
 					indexname = word;
 					parses.addElement(indexname);
 					Request r = new Request(6, parses, null, null, 0);
@@ -453,6 +472,7 @@ public class Interpreter{
 			word = getWord(sql);
 			if(word.isEmpty())
 			{
+				index = 0;
 				Request r = new Request(8, parses, null, null, 0);
 				return r;
 			}
@@ -506,6 +526,7 @@ public class Interpreter{
 						word = getWord(sql);
 					}
 				}
+				index = 0;
 				Condition condition = new Condition(attributename, toCompare, ops, conjunction);
 				Request r = new Request(9, parses, condition, null, 0);
 				return r;
@@ -550,29 +571,23 @@ public class Interpreter{
 				return new Response(false, 0);
 			}
 			System.out.println("Now Creating the table");
-			API.createTable(request);
-			break;
+			return API.createTable(request);
 		case 2:
-			API.createIndex(request);
-			break;
+			return API.createIndex(request);
 		case 3:
 		case 4:
-			API.select(request);
-			break;
+			return API.select(request);
+
 		case 5:
-			API.dropTable(request);
-			break;
+			return API.dropTable(request);
 		case 6:
-			API.dropIndex(request);
-			break;
+			return API.dropIndex(request);
 		case 7:
 			System.out.println("Now inserting");
-			API.insert(request);
-			break;
+			return API.insert(request);
 		case 8:
 		case 9:
-			API.delete(request);
-			break;
+			return API.delete(request);
 		case 10:
 			//Exit
 			break;

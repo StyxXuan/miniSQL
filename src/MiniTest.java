@@ -18,18 +18,21 @@ public class MiniTest {
 				State = bufferedReader.readLine();
 				
 				sql += State;
+				System.out.println(sql);
 				if(sql.equals("quit")){
 					BufferManager.FlushAll();
 					BufferManager.SaveTables();
 					break;
 				}
+				
 				else if(sql.contains(";")) {
 					Request Res = Interpreter.parse(sql);
 					Response Respon = Interpreter.excute(Res);
-//					if(Respon.Tups.size() != 0)
-//						Respon.PrintInfo(Respon.table);
+					if(Respon.isSelect)
+						Respon.PrintInfo(Respon.table);
+					else
+						Respon.PrintInfor();
 					
-					Respon.PrintInfor();
 					sql = "";
 				}
 			}

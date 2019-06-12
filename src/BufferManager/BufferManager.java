@@ -23,10 +23,51 @@ public class BufferManager {
 	
 	static public Map<String, Table> tables;
 	
+	static public Map<String, String> indexs;// first is the IndexName, second is the "table_attribute"
+	
 	static public void Init() {
 		InitBuffer();
 		InitTables();
+		InitIndex();
 	}
+	
+	static public void InitIndex() {
+		indexs = new HashMap<String, String>();
+		RandomAccessFile File;
+		try {
+			File = new RandomAccessFile(indexcatlogFileNameGet(), "rw");
+			int index = 0;
+			int N = File.read();
+			index += 4;
+			for(int i=0; i<N; i++) {
+				File.seek(index);
+				int Indexlength = File.read();
+				index +=4;
+				byte []b = new byte[Indexlength]; 
+				File.seek(index);
+				File.read(b, 0, Indexlength);
+				String IndexName = new String(b, "UTF-8");
+				index += Indexlength;
+				File.seek(index);
+				int TableAttLength = File.read();
+				index +=4;
+				byte []a = new byte[TableAttLength]; 
+				File.seek(index);
+				File.read(b, 0, TableAttLength);
+				String TableAtt = new String(a, "UTF-8");
+				index += Indexlength;
+				indexs.put(IndexName, TableAtt);
+			}
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+	
 	
 	static public void InitBuffer() {
 		for(int i=0; i<Max_Block; i++) {
@@ -67,7 +108,6 @@ public class BufferManager {
 					File.write(FieldType.toInt(att.Type));
 					index+=4;
 					byte []attname = att.attriName.getBytes("UTF-8");
-//					System.out.println(attname);
 					File.seek(index);
 					File.write(attname.length);
 					index += 4;
@@ -91,6 +131,43 @@ public class BufferManager {
 					index += 4;
 				}
 			}
+		} catch (FileNotFoundException e) {
+			System.out.println("Error happened in openning the file");
+			e.printStackTrace();
+		} catch (IOException e) {
+			System.out.println("Error happened in transfering data");
+			e.printStackTrace();
+		}
+	}
+	
+	static public void SavaIndexs() {
+		RandomAccessFile File;
+		try {
+			int index = 0;
+			File = new RandomAccessFile(indexcatlogFileNameGet(), "rw");
+			File.write(indexs.size());
+			index += 4;
+			
+			for (Map.Entry<String, String> entry : indexs.entrySet()) {	
+				String IndexName = entry.getKey();
+				String TableAtt = entry.getValue();
+				byte []b = IndexName.getBytes("UTF-8");
+//				System.out.println(b);
+				File.seek(index);
+				File.write(b.length);
+				index +=4;
+				File.seek(index);
+				File.write(b, 0, b.length);
+				index += b.length;
+				byte []a = TableAtt.getBytes("UTF-8");
+//				System.out.println(b);
+				File.seek(index);
+				File.write(a.length);
+				index +=4;
+				File.seek(index);
+				File.write(b, 0, b.length);
+				index += b.length;
+				}
 		} catch (FileNotFoundException e) {
 			System.out.println("Error happened in openning the file");
 			e.printStackTrace();
@@ -178,9 +255,10 @@ public class BufferManager {
 		}
 	}
 	
-	static public void quit() {
+	static public void quit() throws IOException {
 		FlushAll();
 		SaveTables();
+		SavaIndexs();
 	}
 	
 	static public void FlushAll() {
@@ -299,5 +377,9 @@ public class BufferManager {
 	
 	static public String catlogFileNameGet() {
 		return "DBFile/CATLOG_FILE.SQLCAT";
+	}
+	
+	static public String indexcatlogFileNameGet() {
+		return "DBFile/IndexCat_File.SQLCAT";
 	}
 }

@@ -56,17 +56,26 @@ public class API{
 		long startTime = System.currentTimeMillis();
 		Table table = BufferManager.tables.get(request.tablename);
 		Vector<Tuple> Datas = new Vector<Tuple>();
-		if(request.condition.Attributes.size() == 1 && request.condition.Ops.get(0) == Condition.Operation.EQUAL){
-			Attribute Att = table.GetAttribute(request.condition.Attributes.get(0));
-			int FileOff = IndexManager.select(table, Att, request.condition.Numbers.get(0));
-			Tuple tup = RecordManager.select(table, FileOff);
-			Datas.add(tup);
-		}else {
-			Datas.retainAll(RecordManager.select(table, request.condition));
+		System.out.println("now selecting");
+//		if(request.condition.Attributes.size() == 1 && request.condition.Ops.get(0) == Condition.Operation.EQUAL){
+//			Attribute Att = table.GetAttribute(request.condition.Attributes.get(0));
+//			int FileOff = IndexManager.select(table, Att, request.condition.Numbers.get(0));
+//			Tuple tup = RecordManager.select(table, FileOff);
+//			Datas.add(tup);
+//		}else {
+		if(request.type == 3) {
+			Datas = RecordManager.SelectAll(table);
 		}
+		
+		else if(request.type == 4) {
+			Datas = RecordManager.select(table, request.condition);
+			System.out.println("data size = " + Datas.size());
+		}	
+		
 		long endTime = System.currentTimeMillis();
 		Time =  endTime - startTime;
-		Response Res = new Response(Aff, Time, Datas);
+		Response Res = new Response(Aff, Time, Datas, table);
+		System.out.println("data size = " + Res.Tups.size());
 		return Res;
 	}
 	

@@ -119,18 +119,24 @@ public class RecordManager {
 		int MaxTupNum = BufferManager.Max_Block / TupSize;
 		int CountTup = 0;
 		int RowIndex = 0;
-		Vector<Tuple>SelectedTups = new Vector<Tuple>();
 		Block b = BufferManager.FindBlock(fileName, 0);
-		
+		System.out.println(table.RecordNum);
+		Vector<Tuple> Res = new Vector<Tuple>();
+		System.out.println("recnum = " + table.RecordNum);
 		while(CountTup  < table.RecordNum) {
 			if(RowIndex >= MaxTupNum) {
 				b = BufferManager.GetNextBlock(b);
+				System.out.println("here to get next");
+				System.out.println(b.GetInt(0));
+//				break;
 				RowIndex = 0;
 			}
 			if(b.GetInt(RowIndex * TupSize) != 0) {
+				System.out.println("CountTup = " + CountTup);
 				CountTup++;
 				Tuple mid = new Tuple();
-				int AttIndex = 0;
+				int AttIndex = 4;
+				
 				for(int i=0; i<table.Row.attrinum; i++) {
 					switch(table.Row.attlist.get(i).Type) {
 					case FLOAT:
@@ -148,20 +154,68 @@ public class RecordManager {
 					default:
 						break;
 					}
+					System.out.println("data = " + mid.Data.get(i));
 				}
-				
-				if(condition.Satisfy(mid, table.Row)) {
-					SelectedTups.add(mid);
-				}
+				if(condition.Satisfy(mid, table.Row))
+					Res.add(mid);
 			}
 			RowIndex++;
 		}
-		
-		
-		return SelectedTups;
+		return Res;
 	}
 	
-
+	public static Vector<Tuple> SelectAll(Table table) {
+		String fileName = BufferManager.tableFileNameGet(table.TableName);
+		int TupSize = table.Row.size();
+		int MaxTupNum = BufferManager.Max_Block / TupSize;
+		int CountTup = 0;
+		int RowIndex = 0;
+		Block b = BufferManager.FindBlock(fileName, 0);
+		System.out.println(table.RecordNum);
+		Vector<Tuple> Res = new Vector<Tuple>();
+		System.out.println("recnum = " + table.RecordNum);
+		while(CountTup  < table.RecordNum) {
+			if(RowIndex >= MaxTupNum) {
+				b = BufferManager.GetNextBlock(b);
+				System.out.println("here to get next");
+				System.out.println(b.GetInt(0));
+//				break;
+				RowIndex = 0;
+			}
+			System.out.println("TupSize = " + TupSize);
+			System.out.println("RowIndex = " + RowIndex);
+			if(b.GetInt(RowIndex * TupSize) != 0) {
+				System.out.println("CountTup = " + CountTup);
+				CountTup++;
+				Tuple mid = new Tuple();
+				int AttIndex = 4;
+				
+				for(int i=0; i<table.Row.attrinum; i++) {
+					switch(table.Row.attlist.get(i).Type) {
+					case FLOAT:
+						mid.Data.add(Float.toString(b.GetFloat(AttIndex + RowIndex * TupSize)));
+						AttIndex += 4;
+						break;
+					case INT:
+						mid.Data.add(Integer.toString(b.GetInt(AttIndex + RowIndex * TupSize)));
+						AttIndex += 4;
+						break;
+					case STRING:
+						mid.Data.add(b.GetString(AttIndex + RowIndex * TupSize, table.Row.attlist.get(i).length));
+						AttIndex += table.Row.attlist.get(i).length;
+						break;
+					default:
+						break;
+					}
+					System.out.println("data = " + mid.Data.get(i));
+				}
+				Res.add(mid);
+			}
+			RowIndex++;
+		}
+		return Res;
+	}
+	
 	public static Tuple select(Table table, int Offset){
 		Block b = BufferManager.FindBlock(BufferManager.tableFileNameGet(table.TableName), Offset);
 		Vector<String>Data = new Vector<String>();
