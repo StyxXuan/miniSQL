@@ -43,11 +43,59 @@ public class API{
 	}
 	
 	static public Response createIndex(Request request) {
-		return null;
+		Table tb = BufferManager.tables.get(request.tablename);
+		Attribute attribute = tb.GetAttribute(request.attributename);
+		boolean Aff = true;
+		double Time = 0;
+		try
+		{
+			if (attribute.hasIndex || !attribute.isUnique)
+			{
+				throw new Exception();
+			}
+			else
+			{
+				long startTime = System.currentTimeMillis();
+				IndexManager.createIndex(tb, attribute);
+				long endTime = System.currentTimeMillis();
+				Time = endTime - startTime;
+				attribute.hasIndex = true;
+			}
+		}
+		catch (Exception e)
+		{
+			System.out.println("Failed to create index!");
+			Aff = false;
+		}
+		return new Response(Aff, Time);
 	}
 	
 	static public Response dropIndex(Request request) {
-		return null;
+		Table tb = BufferManager.tables.get(request.tablename);
+		Attribute attribute = tb.GetAttribute(request.attributename);
+		boolean Aff = true;
+		double Time = 0;
+		try
+		{
+		    if (attribute.hasIndex)
+		    {
+			long startTime = System.currentTimeMillis();
+			IndexManager.dropIndex(tb, attribute);
+			long endTime = System.currentTimeMillis();
+			Time = endTime - startTime;
+			attribute.hasIndex = false;
+		    }
+		    else
+		    {
+			throw new Exception();
+		    }
+		}
+		catch (Exception e)
+		{
+		    System.out.println("Index not exists!");
+		    Aff = false;
+		}
+		return new Response(Aff, Time);
 	}
 	
 	static public Response select(Request request) {
