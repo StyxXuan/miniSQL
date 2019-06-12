@@ -20,6 +20,7 @@ public class Response {
 		this.time = Time;
 		this.Tups = Tups;
 	}
+	
 	public void PrintInfo(Table table)
 	{
 		int col = 0, row = 0, i , j, k, len = 0;
