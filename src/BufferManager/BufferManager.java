@@ -32,7 +32,7 @@ public class BufferManager {
 		for(int i=0; i<Max_Block; i++) {
 			Age[i] = 0;
 			Buffer[i] = new Block();
-			Buffer[i].isValid = false;
+			Buffer[i].isValid = true;
 		}
 	}
 	
@@ -46,14 +46,14 @@ public class BufferManager {
 			
 			for (Map.Entry<String, Table> entry : tables.entrySet()) {	
 				Table table = entry.getValue();
+				byte []b = table.TableName.getBytes("UTF-8");
+//				System.out.println(b);
 				File.seek(index);
-				File.write(table.TableName.length());
+				File.write(b.length);
 				index +=4;
-				byte []b = new byte[table.TableName.length()]; 
-				b = table.TableName.getBytes();
 				File.seek(index);
-				File.write(b, 0, table.TableName.length());
-				index += table.TableName.length();
+				File.write(b, 0, b.length);
+				index += b.length;
 				File.seek(index);
 				File.write(table.RecordNum);
 				index += 4;
@@ -66,13 +66,14 @@ public class BufferManager {
 					File.seek(index);
 					File.write(FieldType.toInt(att.Type));
 					index+=4;
+					byte []attname = att.attriName.getBytes("UTF-8");
+//					System.out.println(attname);
 					File.seek(index);
-					File.write(att.attriName.length());
+					File.write(attname.length);
 					index += 4;
-					byte []attname = att.attriName.getBytes();
 					File.seek(index);
-					File.read(attname, 0, att.attriName.length());
-					index += att.attriName.length();
+					File.write(attname, 0, attname.length);
+					index += attname.length;
 					File.seek(index);
 					File.write(att.length);
 					index += 4;
@@ -106,6 +107,7 @@ public class BufferManager {
 			int index = 0;
 			File = new RandomAccessFile(catlogFileNameGet(), "rw");
 			int N = File.read();
+			System.out.println("N = " + N);
 			index += 4;
 			for(int i = 0; i<N; i++) {
 				File.seek(index);
@@ -114,13 +116,17 @@ public class BufferManager {
 				byte []b = new byte[tablenamelength]; 
 				File.seek(index);
 				File.read(b, 0, tablenamelength);
-				String TableName = b.toString();
+//				System.out.println("b = " +  b);
+				String TableName = new String(b, "UTF-8");
+				System.out.println("tablename = " + TableName);
 				index += tablenamelength;
 				File.seek(index);
 				int RecNum = File.read();
+//				System.out.println(RecNum + " RecNum");
 				index += 4;
 				File.seek(index);
 				int AttNum = File.read();
+//				System.out.println(AttNum + " AttNum");
 				index += 4;
 				List<Attribute> attlist = new ArrayList<Attribute>();
 			
@@ -134,7 +140,9 @@ public class BufferManager {
 					index += 4;
 					File.seek(index);
 					File.read(attname, 0, AttNameLen);
-					String AttName = attname.toString();
+//					System.out.println("attname = " + attname);
+					String AttName = new String(attname, "UTF-8");
+//					System.out.println("AttName = " + AttName);
 					index += AttNameLen;
 					File.seek(index);
 					int length = File.read();
@@ -177,7 +185,7 @@ public class BufferManager {
 	
 	static public void FlushAll() {
 		for(int i=0; i<Max_Block; i++) {
-			if(Buffer[i].isValid && Buffer[i].isDirty) {
+			if(Buffer[i].isDirty) {
 				try {
 					System.out.println("WriteBack " + i);
 					Buffer[i].WriteBack();
@@ -191,7 +199,7 @@ public class BufferManager {
 	static public void RemoveBlockFromBuffer(Table table) {
 		for(int i=0; i<Max_Block; i++) {
 			if(Buffer[i].file == tableFileNameGet(table.TableName)) {
-				Buffer[i].isValid = false;
+				Buffer[i].isValid = true;
 			}
 		}
 	}
@@ -199,7 +207,7 @@ public class BufferManager {
 	static public void RemoveBlockFromBuffer(String FileName) {
 		for(int i=0; i<Max_Block; i++) {
 			if(Buffer[i].file == FileName) {
-				Buffer[i].isValid = false;
+				Buffer[i].isValid = true;
 			}
 		}
 	}
@@ -212,7 +220,7 @@ public class BufferManager {
 		int index = -1;
 		int MIN = 10000;
 		for(int i=0; i<Max_Block; i++){
-			if(Buffer[i].isValid == false) {
+			if(Buffer[i].isValid == true) {
 				return i;
 			}
 			if((Age[i] < MIN) && (!Buffer[i].isPined)) {
@@ -226,7 +234,7 @@ public class BufferManager {
 	
 	static public boolean BufferReplace(int index, String file, int offset) {
 		try {
-			if(Buffer[index].isDirty && Buffer[index].isValid) 
+			if(Buffer[index].isDirty && !Buffer[index].isValid) 
 				Buffer[index].WriteBack();
 				
 			Buffer[index].SetBlock(file, offset - offset % Max_Block);
@@ -259,15 +267,19 @@ public class BufferManager {
 		return b.GetString(BlockOff, length);
 	}
 	
-	static public Block FindBlock(String file, int offset) {
+	static public Block FindBlock(String FileName, int offset) {
+		int BlockOff = offset / Max_Block;
 		for(int i=0; i<Max_Block; i++){
-			if(Buffer[i].file == file && Buffer[i].fileOffset <= offset && Buffer[i].fileOffset < offset + Max_Block)
+//			System.out.println(Buffer[i].file + " " + FileName);
+//			System.out.println(Buffer[i].fileOffset + " " + offset);
+			int BufferBlockOff = Buffer[i].fileOffset / Max_Block;
+			if((Buffer[i].file.equals(FileName)) && (BufferBlockOff == BlockOff))
 				return Buffer[i];
 		}
 		
 		int index = LRU();
-		System.out.println("index = " + index);
-		if(!BufferReplace(index, file, offset)) {
+//		System.out.println("index = " + index);
+		if(!BufferReplace(index, FileName, offset)) {
 			System.out.println("Buffer replace error");
 			return null;
 		}
@@ -275,17 +287,17 @@ public class BufferManager {
 		return GetBlock(index);
 	}
 	
-	public static String tableFileNameGet(String filename)
+	static public String tableFileNameGet(String filename)
 	{
 		return "DBFile/TABLE_FILE_" + filename + ".SQLTable";
 	}
 	
-	public static String indexFileNameGet(String filename)
+	static public String indexFileNameGet(String filename)
 	{
 		return "DBFile/INDEX_FILE_" + filename + ".SQLIndex";
 	}
 	
-	public static String catlogFileNameGet() {
+	static public String catlogFileNameGet() {
 		return "DBFile/CATLOG_FILE.SQLCAT";
 	}
 }

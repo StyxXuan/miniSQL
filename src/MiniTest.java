@@ -4,17 +4,16 @@ import java.io.InputStreamReader;
 import BufferManager.*;
 
 import MiniSQL.*;
-import MiniSQL.Interpreter;
 
 public class MiniTest {
 
 	public static void main(String[] args) throws IOException{
 		String sql = "";
 		boolean Loop = true;
+		BufferManager.Init();
 		while(Loop) {
 			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
 			try {
-				BufferManager.Init();
 				String State = "";
 				State = bufferedReader.readLine();
 				
@@ -24,20 +23,23 @@ public class MiniTest {
 					BufferManager.SaveTables();
 					break;
 				}
-				if(sql.contains(";")) {
-					Interpreter Inter = new Interpreter(sql);
-					Response Res = Inter.excute(Inter.parse(sql));
+				else if(sql.contains(";")) {
+					Request Res = Interpreter.parse(sql);
+					Response Respon = Interpreter.excute(Res);
+//					if(Respon.Tups.size() != 0)
+//						Respon.PrintInfo(Respon.table);
 					
-					Res.PrintInfor();
+					Respon.PrintInfor();
 					sql = "";
 				}
 			}
 			catch(Exception Exp) {
 				if(Exp.getMessage() == null) 
-					System.out.println("error");
+					System.out.println("error Exp");
 				
 				else
 					System.out.println(Exp.getMessage());
+				
 				sql = "";
 			}
 		}

@@ -10,7 +10,7 @@ public class Tuple {
 	Vector<String>Data;
 	public Tuple() {
 		valid = 0;
-		Data = null;
+		Data = new Vector<String>();
 	}
 	
 	public Tuple(int valid, Vector<String> data) {

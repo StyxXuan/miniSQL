@@ -7,6 +7,7 @@ import java.io.DataOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.io.UnsupportedEncodingException;
 
 
 
@@ -51,12 +52,13 @@ public class Block {
 			this.data[i] = data2write[i - off];
 	}
 	
-	@SuppressWarnings("resource")
 	public void WriteBack() throws IOException {
+		System.out.println(file);
 		RandomAccessFile File = new RandomAccessFile(file, "rw");
 		File.seek(fileOffset);
 		File.write(data, 0, Block.Size);
 		this.isDirty = false;
+		File.close();
 	}
 	
 	public int GetInt(int offset) {
@@ -102,7 +104,14 @@ public class Block {
 		for(int i=0; i<length; i++)
 			ByteString[i] = data[i+offset]; 
 		
-		return ByteString.toString();
+		String Mid = null;
+		try {
+			Mid = new String(ByteString, "UTF-8");
+			return Mid;
+		} catch (UnsupportedEncodingException e) {
+			System.out.println("UnsupportedEncodingException");
+		}
+		return Mid;
 	}
 	
 	public void WriteInt(int num, int offset) {

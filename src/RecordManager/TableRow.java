@@ -12,7 +12,9 @@ public class TableRow {
 	
 	public FieldType GetType(String AttName) {
 		for(int i=0; i<attlist.size(); i++) {
-			if(attlist.get(i).attriName == AttName)
+			System.out.println(attlist.get(i).attriName + " " + AttName);
+			System.out.println(attlist.get(i).Type);
+			if(attlist.get(i).attriName.equals(AttName))
 				return attlist.get(i).Type;
 		}
 		return FieldType.Empty;
@@ -20,7 +22,7 @@ public class TableRow {
 	
 	public int GetIndex(String AttName) {
 		for(int i=0; i<attlist.size(); i++) {
-			if(attlist.get(i).attriName == AttName)
+			if(attlist.get(i).attriName.equals(AttName))
 				return i;
 		}
 		return -1;

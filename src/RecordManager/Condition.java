@@ -7,14 +7,14 @@ import java.util.Vector;
 public class Condition
 {
 	public enum Operation{
-		EQUAL, NOT_EQUAL, LESS, MORE, LESS_EQUAL, MORE_EQUAL;
+		EQUAL, NOT_EQUAL, LESS, MORE, LESS_EQUAL, MORE_EQUAL, EMPTY;
 	}
 
-	public Vector<String> Attributes;
-	public Vector<String> Numbers;
+	public Vector<String> Attributes = new Vector<String>();
+	public Vector<String> Numbers = new Vector<String>();
 	
-	public Vector<Operation> Ops;
-	public Vector<String>Conjunctions;
+	public Vector<Operation> Ops = new Vector<Operation>();
+	public Vector<String>Conjunctions = new Vector<String>();
 	
 	public Condition(String AttName, String ToCampare, Operation Op) {
 		Attributes.addElement(AttName);
@@ -30,7 +30,7 @@ public class Condition
 		this.Ops = Ops;
 		this.Conjunctions = Conjunctions;
 	}
-	
+
 	public boolean Satisfy(Tuple tup, TableRow Row) {
 		int index = 0;
 		if(Attributes.size() == 0)
@@ -38,7 +38,8 @@ public class Condition
 		
 		boolean res = Satisfy(tup, Row, Attributes.get(index), Numbers.get(index), Ops.get(index));
 		index++;
-		while(Conjunctions.size() < index) {
+		System.out.println("here to judge");
+		while(Conjunctions != null && Conjunctions.size() > index) {
 			String Con = Conjunctions.get(index-1);
 			if(Con.equals("and")) {
 				res &= Satisfy(tup, Row, Attributes.get(index), Numbers.get(index), Ops.get(index));
@@ -50,14 +51,13 @@ public class Condition
 		return res;
 	}
 	
-	public boolean Satisfy(String Key) {
-		return false;
-	}
-	
 	public boolean Satisfy(Tuple tup, TableRow Row, String Attribute, String Number, Operation Op){
 		FieldType Type = Row.GetType(Attribute);
+		System.out.println(Type);
+		System.out.println(Number+ " " + Attribute);
 		boolean res = false;
 		if(Op == Operation.EQUAL) {
+			System.out.println("The operation equal");
 			if(Type == FieldType.FLOAT) {
 				float num = Float.parseFloat(Number);
 				float att = Float.parseFloat(tup.GetData(Row.GetIndex(Attribute)));
@@ -67,7 +67,11 @@ public class Condition
 				int att = Integer.getInteger(tup.GetData(Row.GetIndex(Attribute)));
 				res = (num == att);
 			}else if(Type == FieldType.STRING) {
-				String att = tup.GetData(Row.GetIndex(Attribute));
+				System.out.println("String equal");
+				int index = Row.GetIndex(Attribute);
+				System.out.println("index = " + index);
+				String att = tup.GetData(index);
+				System.out.println("att = " + att);
 				res = (Number.equals(att));
 			}
 		}else if(Op == Operation.NOT_EQUAL) {

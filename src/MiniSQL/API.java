@@ -18,9 +18,10 @@ public class API{
 			Atts.add(request.attriVec.get(i));
 		
 		try {
-
 			long startTime = System.currentTimeMillis();
+			System.out.println(request.tablename);
 			RecordManager.createTable(request.tablename, Atts);
+			System.out.println(BufferManager.tables.size());
 			long endTime = System.currentTimeMillis();
 			Time = endTime - startTime;
 		} catch (IOException e) {
@@ -73,9 +74,18 @@ public class API{
 		boolean Aff = true;
 		double Time = 0;
 		Table table = BufferManager.tables.get(request.tablename);
-//		request.
-//		RecordManager.insert(table, tups);
-		return null;
+		System.out.println(request.tablename);
+		System.out.println(BufferManager.tables.size());
+		if(table == null) {
+			System.out.println("table not found");
+			return  new Response(false, 0);
+		}
+		
+		Tuple tup = new Tuple(1, request.insertValue);
+		System.out.println("Now inserting ele");
+		RecordManager.insert(table, tup);
+		Response Res = new Response(Aff, Time);
+		return Res;
 	}
 	
 	static public Response delete(Request request) {
@@ -84,7 +94,8 @@ public class API{
 		long startTime = System.currentTimeMillis();
 		Table table = BufferManager.tables.get(request.tablename);
 //		IndexManager.delete(table, attribute, key)
-		RecordManager.delete(table, request.condition);
+		int DeletedNum = RecordManager.delete(table, request.condition);
+		table.RecordNum -= DeletedNum;
 		long endTime = System.currentTimeMillis();
 		Time = endTime - startTime;
 		Response Res = new Response(Aff, Time);

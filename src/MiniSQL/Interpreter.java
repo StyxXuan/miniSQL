@@ -7,27 +7,20 @@ import RecordManager.Condition;
 import RecordManager.Condition.Operation;
 import RecordManager.Attribute;
 import RecordManager.FieldType;
+import CatalogManager.*;
 
 public class Interpreter{
 	static int index = 0;
 	/*
 	 * create table student (sno char(8), sname char(16) unique, sage int, sgender char (1),primary key ( sno ));
+	 * insert into student values('12345678', '1234567890123456', 10, '1');
+	 * drop table student;
+	 * delete from student where sno = '12345678';
 	 */
 
 	
-	public Interpreter(String sql)
-	{
-		BufferManager.Init();
-		Request r = parse(sql);
-		if(r != null)
-		{
-			Response result = excute(r);
-			result.PrintInfor();
-		}
-	}
 	
-	@SuppressWarnings("null")
-	public Request parse(String sql) {
+	static public Request parse(String sql) {
 		Vector<String> parses = new Vector<String>();
 		String word;
 		word = getWord(sql);
@@ -546,12 +539,16 @@ public class Interpreter{
 		return null;
 	}
 	
-	public Response excute(Request request) 
+	static public Response excute(Request request) 
 	{
 		double startTime = System.currentTimeMillis();
 		switch(request.type)
 		{
 		case 1:
+			if(CatalogManager.tableExists(request.tablename)) {
+				System.out.println("table already exsist");
+				return new Response(false, 0);
+			}
 			System.out.println("Now Creating the table");
 			API.createTable(request);
 			break;
@@ -569,6 +566,7 @@ public class Interpreter{
 			API.dropIndex(request);
 			break;
 		case 7:
+			System.out.println("Now inserting");
 			API.insert(request);
 			break;
 		case 8:

@@ -10,6 +10,7 @@ import BufferManager.BufferManager;
 public class RecordManager {
 
 	public static boolean createTable(String Name, List<Attribute> Atts) throws IOException {
+		System.out.println("Here to create");
 		TableRow NewRow = new TableRow(Atts, Atts.size());
 		Table NewTable = new Table(Name, NewRow);
 		String t_name = BufferManager.tableFileNameGet(NewTable.TableName);
@@ -23,6 +24,8 @@ public class RecordManager {
 		b.WriteInt(0, 0);
 		b.isDirty = true;
 		BufferManager.tables.put(Name, NewTable);
+		System.out.println(BufferManager.tables.size());
+		System.out.println(Name);
 		return true;
 	}
 	
@@ -40,6 +43,7 @@ public class RecordManager {
 		b.WriteInt(0, 0);
 		b.isDirty = true;
 		BufferManager.tables.put(table.TableName, table);
+		System.out.println(table.TableName);
 		return true;
 	}
 	
@@ -47,29 +51,35 @@ public class RecordManager {
 	{
 		String t_name = BufferManager.tableFileNameGet(table.TableName);
 		File ft = new File(t_name);
+		File Cat = new File(BufferManager.catlogFileNameGet());
 		if(!ft.exists())
 			return false;
 		
 		BufferManager.RemoveBlockFromBuffer(table);
 		BufferManager.tables.remove(table.TableName);
-		return ft.delete();
+		
+		System.out.println(BufferManager.tables.size());
+		return ft.delete() & Cat.delete();
 	}
 	
 	public static boolean dropTable(String TableName) {
-		File ft = new File(BufferManager.tableFileNameGet(TableName));
-		if(!ft.exists())
-			return false;
-		
 		BufferManager.RemoveBlockFromBuffer(BufferManager.tableFileNameGet(TableName));
-		BufferManager.tables.remove(BufferManager.tableFileNameGet(TableName));
-		return ft.delete();
+		BufferManager.tables.remove(TableName);
+		File ft = new File(BufferManager.tableFileNameGet(TableName));
+		File Cat = new File(BufferManager.catlogFileNameGet());
+		
+		if(!ft.exists())
+			return Cat.delete();
+		
+		return ft.delete() & Cat.delete();
 	}
 	
 	public static void insert(Table table, Tuple tup) {
 		String fileName = BufferManager.tableFileNameGet(table.TableName);
+		System.out.println(fileName);
 		int TupSize = table.Row.size() + 4;
 		int MaxTupNum = BufferManager.Max_Block / TupSize;
-		
+		System.out.println("max tup num = " + MaxTupNum);
 		// Find the free space
 		Block b = BufferManager.FindBlock(fileName, 0);
 		int RowIndex = 0;
@@ -81,11 +91,12 @@ public class RecordManager {
 			}
 			RowIndex++;
 			Valid = b.GetInt(RowIndex * TupSize);
+			System.out.println("RowIndex = " + RowIndex + " " + Valid);
 		}
 		
 		b.WriteInt(1, RowIndex * TupSize);
 		System.out.println("b.read" + b.GetInt(RowIndex * TupSize));
-		b.isValid = true;
+		b.isValid = false;
 		b.WriteData(tup.GetBytes(table), TupSize - 4, RowIndex * TupSize + 4);
 		System.out.println("b.read" + b.GetInt(RowIndex * TupSize + 4));
 		b.isDirty = true;
@@ -195,6 +206,7 @@ public class RecordManager {
 		int CountDelete = 0;
 		int RowIndex = 0;
 		Block b = BufferManager.FindBlock(fileName, 0);
+		System.out.println(table.RecordNum);
 		
 		while(CountTup  < table.RecordNum) {
 			if(RowIndex >= MaxTupNum) {
@@ -202,9 +214,11 @@ public class RecordManager {
 				RowIndex = 0;
 			}
 			if(b.GetInt(RowIndex * TupSize) != 0) {
+				System.out.println("CountTup = " + CountTup);
 				CountTup++;
 				Tuple mid = new Tuple();
 				int AttIndex = 4;
+				
 				for(int i=0; i<table.Row.attrinum; i++) {
 					switch(table.Row.attlist.get(i).Type) {
 					case FLOAT:
@@ -222,11 +236,15 @@ public class RecordManager {
 					default:
 						break;
 					}
+					System.out.println("data = " + mid.Data.get(i));
 				}
 				
+				System.out.println("satisfication judgement");
 				if(condition.Satisfy(mid, table.Row)) {
-					
+					System.out.println("found the tuple");
 					b.WriteInt(0, (RowIndex * TupSize));
+					b.isDirty = true;
+					b.isValid = true;
 					CountDelete++;
 				}
 			}

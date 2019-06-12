@@ -7,6 +7,8 @@ public class Table {
 	public TableRow Row ;
 	public int RecordNum;
 	
+	public Table() {}
+	
 	public Table(String TableName, TableRow Row) {
 		this.TableName = TableName; 
 		this.Row = Row; 
