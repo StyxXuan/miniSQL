@@ -1,6 +1,8 @@
 package MiniSQL;
 
 import java.util.Vector;
+
+import BufferManager.BufferManager;
 import RecordManager.Condition;
 import RecordManager.Condition.Operation;
 import RecordManager.Attribute;
@@ -11,15 +13,11 @@ public class Interpreter{
 	/*
 	 * create table student (sno char(8), sname char(16) unique, sage int, sgender char (1),primary key ( sno ));
 	 */
-    public static void main(String []args)
-	{
-		String word = "create table student (sno char(8), sname char(16) unique, sage int, sgender char (1),primary key ( sno ));";
-		Request r = parse(word);
-///		for(int i = 0; i < 4; i++)
-	//		System.out.println(r.insertValue.elementAt(i));
-	}
+
+	
 	public Interpreter(String sql)
 	{
+		BufferManager.Init();
 		Request r = parse(sql);
 		if(r != null)
 		{
@@ -29,7 +27,7 @@ public class Interpreter{
 	}
 	
 	@SuppressWarnings("null")
-	public static Request parse(String sql) {
+	public Request parse(String sql) {
 		Vector<String> parses = new Vector<String>();
 		String word;
 		word = getWord(sql);
@@ -548,12 +546,13 @@ public class Interpreter{
 		return null;
 	}
 	
-	public static Response excute(Request request) 
+	public Response excute(Request request) 
 	{
 		double startTime = System.currentTimeMillis();
 		switch(request.type)
 		{
 		case 1:
+			System.out.println("Now Creating the table");
 			API.createTable(request);
 			break;
 		case 2:

@@ -28,8 +28,7 @@ public class Request
 	String attributename = "";
 	Vector<String> attriSelect = new Vector<String>();
 	Vector<String> insertValue =  new Vector<String>();
-//	Vector<Condition> conditionVec = null;
-	Condition condition;
+	Condition condition = new Condition();
 	Vector<Attribute> attriVec = new Vector<Attribute>();
 	int primarykeylocation = -1;
 	boolean exit = false;

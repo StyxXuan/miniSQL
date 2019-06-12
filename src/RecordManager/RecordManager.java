@@ -56,12 +56,12 @@ public class RecordManager {
 	}
 	
 	public static boolean dropTable(String TableName) {
-		File ft = new File(TableName);
+		File ft = new File(BufferManager.tableFileNameGet(TableName));
 		if(!ft.exists())
 			return false;
 		
-		BufferManager.RemoveBlockFromBuffer(TableName);
-		BufferManager.tables.remove(TableName);
+		BufferManager.RemoveBlockFromBuffer(BufferManager.tableFileNameGet(TableName));
+		BufferManager.tables.remove(BufferManager.tableFileNameGet(TableName));
 		return ft.delete();
 	}
 	
@@ -204,7 +204,7 @@ public class RecordManager {
 			if(b.GetInt(RowIndex * TupSize) != 0) {
 				CountTup++;
 				Tuple mid = new Tuple();
-				int AttIndex = 0;
+				int AttIndex = 4;
 				for(int i=0; i<table.Row.attrinum; i++) {
 					switch(table.Row.attlist.get(i).Type) {
 					case FLOAT:
@@ -225,6 +225,7 @@ public class RecordManager {
 				}
 				
 				if(condition.Satisfy(mid, table.Row)) {
+					
 					b.WriteInt(0, (RowIndex * TupSize));
 					CountDelete++;
 				}

@@ -23,6 +23,7 @@ public class Condition
 		Conjunctions = null;
 	}
 	
+	public Condition() {};
 	public Condition(Vector<String> Attributes, Vector<String> Numbers, Vector<Operation> Ops, Vector<String>Conjunctions) {
 		this.Attributes = Attributes;
 		this.Numbers = Numbers;
