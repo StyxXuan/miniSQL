@@ -1,4 +1,4 @@
- package IndexManager;
+package IndexManager;
 
 import java.lang.String;
 import java.io.File;
@@ -11,30 +11,36 @@ public class IndexManager {
     public static BPlusTree<String> sTree;
     public static String indexFileName;
 
-    public static void InitTree(Attribute attribute)
+    public static void InitTree(FieldType type, int keySize)
     {
         //valid int + size + key + value
-        int degree = (Block.Size - 8) / (attribute.length + Integer.SIZE / 8);
-        switch (attribute.Type)
+        int degree = (Block.Size - 8) / (keySize + Integer.SIZE / 8);
+        switch (type)
         {
             case INT:
-                iTree = new BPlusTree<Integer>(indexFileName, attribute.length, degree, attribute.Type);
+                iTree = new BPlusTree<Integer>(indexFileName, keySize, degree, type);
                 break;
 
             case FLOAT:
-                fTree = new BPlusTree<Float>(indexFileName, attribute.length, degree, attribute.Type);
+                fTree = new BPlusTree<Float>(indexFileName, keySize, degree, type);
                 break;
 
             case STRING:
-                sTree = new BPlusTree<String>(indexFileName, attribute.length, degree, attribute.Type);
+                sTree = new BPlusTree<String>(indexFileName, keySize, degree, type);
                 break;
 
             default: System.out.println("Invalid type!"); break;
         }
     }
-	public static boolean createIndex(Table table, Attribute attribute) {
+    public static boolean createIndex(String tableName, String attributeName, String indexName) {
         //Create new index file
-        indexFileName = BufferManager.indexFileNameGet(table.TableName + "_" + attribute.attriName);
+        indexFileName = BufferManager.indexFileNameGet(indexName);
+        Table table = BufferManager.tables.get(tableName);
+        Attribute attribute = table.GetAttribute(attributeName);
+        if (attribute.hasIndex || !attribute.isUnique)
+        {
+            return false;
+        }
         File fp = new File(indexFileName);
         try
         {
@@ -53,11 +59,11 @@ public class IndexManager {
             e.printStackTrace();
         }
         //Set up BPlusTree
-        InitTree(attribute);
+        InitTree(attribute.Type, attribute.length);
         //Insert key-value
         String fileName = BufferManager.tableFileNameGet(table.TableName);
         Block b = BufferManager.FindBlock(fileName, 0);
-        int TupSize = table.Row.size();
+        int TupSize = table.Row.size() + 4;
         int MaxTupNum = BufferManager.Max_Block / TupSize;
         int CountTup = 0, RowIndex = 0, InitOffset = 0, offset = 0, blockOfs = 0;
         for(int i=0; i < table.Row.attrinum; i++) {
@@ -86,21 +92,37 @@ public class IndexManager {
                     case FLOAT:
                         fTree.insert(b.GetFloat(blockOfs), offset + RowIndex); break;
                     case STRING:
+                        String s = b.GetString(blockOfs, attribute.length);
                         sTree.insert(b.GetString(blockOfs, attribute.length), offset + RowIndex); break;
                     default:
                         break;
                 }
-                RowIndex++;
                 CountTup++;
             }
+            RowIndex++;
+        }
+        switch(attribute.Type) {
+            case INT:
+                iTree.printTree(); break;
+            case FLOAT:
+                fTree.printTree(); break;
+            case STRING:
+                sTree.printTree(); break;
+            default:
+                break;
         }
         //Write to file
-        writeToBuffer(attribute.Type);
-		return true;
-	}
 
-	public static boolean dropIndex(Table table, Attribute attribute) {
-        indexFileName = BufferManager.indexFileNameGet(table.TableName + "_" + attribute.attriName);
+        BufferManager.indexs.put(indexName, tableName + "_" + attributeName);
+        System.out.println("Indexs Map:" + BufferManager.indexs.size() + "," + BufferManager.indexs.get(indexName));
+        writeToBuffer(attribute.Type);
+        BufferManager.FlushAll();
+        attribute.hasIndex = true;
+        return true;
+    }
+
+    public static boolean dropIndex(String indexName) {
+        indexFileName = BufferManager.indexFileNameGet(indexName);
         BufferManager.RemoveBlockFromBuffer(indexFileName);  //Need to be implemented in Buffermanager.java
         File fp = new File(indexFileName);
         if (!fp.delete())
@@ -108,15 +130,21 @@ public class IndexManager {
             System.out.println("Failed to drop index!");
             return false;
         }
-		return true;
-	}
+        String [] s = BufferManager.indexs.get(indexName).split("_");
+        System.out.println(s);
+        Table table = BufferManager.tables.get(s[0]);
+        Attribute attribute = table.GetAttribute(s[1]);
+        attribute.hasIndex = false;
+        BufferManager.indexs.remove(indexName);
+        return true;
+    }
 
     //single-equivalent select
-	public static int select(Table table, Attribute attribute, String key) {
+    public static int select(Table table, Attribute attribute, String key) {
         indexFileName = BufferManager.indexFileNameGet(table.TableName + "_" + attribute.attriName);
         int resAddress = -1;
         //Read BPlusTree from buffer
-        InitTree(attribute);
+        InitTree(attribute.Type, attribute.length);
         readFromBuffer(attribute.Type);
         switch(attribute.Type) {
             case INT:
@@ -134,11 +162,13 @@ public class IndexManager {
             default: break;
         }
         return resAddress;
-	}
+    }
 
-	public static boolean insert(Table table, Attribute attribute, String key, int addr) {
-        indexFileName = BufferManager.indexFileNameGet(table.TableName + "_" + attribute.attriName);
-        InitTree(attribute);
+    public static boolean insert(String tableName, String attributeName, String key, int addr) {
+        indexFileName = BufferManager.indexFileNameGet(tableName + "_" + attributeName);
+        Table table = BufferManager.tables.get(tableName);
+        Attribute attribute = table.GetAttribute(attributeName);
+        InitTree(attribute.Type, attribute.length);
         readFromBuffer(attribute.Type);
         switch(attribute.Type) {
             case INT:
@@ -156,12 +186,14 @@ public class IndexManager {
             default: return false;
         }
         writeToBuffer(attribute.Type);
-		return true;
-	}
+        return true;
+    }
 
-	public static boolean delete(Table table, Attribute attribute, String key) {
-        indexFileName = BufferManager.indexFileNameGet(table.TableName + "_" + attribute.attriName);
-        InitTree(attribute);
+    public static boolean delete(String tableName, String attributeName, String key) {
+        indexFileName = BufferManager.indexFileNameGet(tableName + "_" + attributeName);
+        Table table = BufferManager.tables.get(tableName);
+        Attribute attribute = table.GetAttribute(attributeName);
+        InitTree(attribute.Type, attribute.length);
         readFromBuffer(attribute.Type);
         switch(attribute.Type) {
             case INT:
@@ -180,7 +212,7 @@ public class IndexManager {
         }
         writeToBuffer(attribute.Type);
         return true;
-	}
+    }
 
     public static void readFromBuffer(FieldType type)
     {
@@ -212,13 +244,13 @@ public class IndexManager {
         {
             node = new TreeNode<Integer>(NodeType.LEAF);
             node.numOfKeys = indexBlock.GetInt(4);
-            offset += 8;
+            offset = 8;
             for (int i = 0; i < node.numOfKeys; i++)
             {
                 node.keys.setElementAt(indexBlock.GetInt(offset), i);
-                address = indexBlock.GetInt(offset + iTree.keySize);
+                address = indexBlock.GetInt(offset + 4);
                 node.values.setElementAt(address, i);
-                offset += iTree.keySize + 4;
+                offset += 8;
             }
             if (iTree.lastLeafNode == null)
             {
@@ -234,11 +266,11 @@ public class IndexManager {
         {
             node = new TreeNode<Integer>(NodeType.INTERNAL);
             node.numOfKeys = indexBlock.GetInt(4);
-            offset += 8;
+            offset = 8;
             for (int i = 0; i < node.numOfKeys; i++)
             {
                 node.keys.setElementAt(indexBlock.GetInt(offset), i);
-                offset += iTree.keySize;
+                offset += 4;
             }
             for (int i = 0; i <= node.numOfKeys; i++)
             {
@@ -260,13 +292,13 @@ public class IndexManager {
         {
             node = new TreeNode<Float>(NodeType.LEAF);
             node.numOfKeys = indexBlock.GetInt(4);
-            offset += 8;
+            offset = 8;
             for (int i = 0; i < node.numOfKeys; i++)
             {
                 node.keys.setElementAt(indexBlock.GetFloat(offset), i);
-                address = indexBlock.GetInt(offset + fTree.keySize);
+                address = indexBlock.GetInt(offset + 4);
                 node.values.setElementAt(address, i);
-                offset += fTree.keySize + 4;
+                offset += 8;
             }
             if (fTree.lastLeafNode == null)
             {
@@ -282,11 +314,11 @@ public class IndexManager {
         {
             node = new TreeNode<Float>(NodeType.INTERNAL);
             node.numOfKeys = indexBlock.GetInt(4);
-            offset += 8;
+            offset = 8;
             for (int i = 0; i < node.numOfKeys; i++)
             {
                 node.keys.setElementAt(indexBlock.GetFloat(offset), i);
-                offset += fTree.keySize;
+                offset += 4;
             }
             for (int i = 0; i <= node.numOfKeys; i++)
             {
@@ -308,7 +340,7 @@ public class IndexManager {
         {
             node = new TreeNode<String>(NodeType.LEAF);
             node.numOfKeys = indexBlock.GetInt(4);
-            offset += 8;
+            offset = 8;
             for (int i = 0; i < node.numOfKeys; i++)
             {
                 node.keys.setElementAt(indexBlock.GetString(offset, sTree.keySize), i);
@@ -330,7 +362,7 @@ public class IndexManager {
         {
             node = new TreeNode<String>(NodeType.INTERNAL);
             node.numOfKeys = indexBlock.GetInt(4);
-            offset += 8;
+            offset = 8;
             for (int i = 0; i < node.numOfKeys; i++)
             {
                 node.keys.setElementAt(indexBlock.GetString(offset, sTree.keySize), i);
@@ -379,25 +411,25 @@ public class IndexManager {
         }
         else if (node.nodeType == NodeType.LEAF)
         {
-            indexBlock.WriteInt(0, offset);  //0 for leaf node
-            indexBlock.WriteInt(node.numOfKeys, offset);  //size
-            offset += 2 * Integer.SIZE / 8;
+            indexBlock.WriteInt(0, 0);  //0 for leaf node
+            indexBlock.WriteInt(node.numOfKeys, 4);  //size
+            offset = 8;
             for (int i = 0; i < node.numOfKeys; i++)
             {
                 indexBlock.WriteInt(node.keys.get(i), offset);
-                indexBlock.WriteInt(node.values.get(i), offset + iTree.keySize);
-                offset += iTree.keySize + Integer.SIZE / 8;
+                indexBlock.WriteInt(node.values.get(i), offset + 4);
+                offset += 8;
             }
         }
         else
         {
-            indexBlock.WriteInt(1, offset);  //1 for internal node
-            indexBlock.WriteInt(node.numOfKeys, offset);  //size
-            offset += 2 * Integer.SIZE / 8;
+            indexBlock.WriteInt(0, 0);  //0 for leaf node
+            indexBlock.WriteInt(node.numOfKeys, 4);  //size
+            offset = 8;
             for (int i = 0; i < node.numOfKeys; i++)
             {
                 indexBlock.WriteInt(node.keys.get(i), offset);
-                offset += iTree.keySize;
+                offset += 4;
             }
             for (int i = 0; i <= node.numOfKeys; i++)
             {
@@ -405,6 +437,7 @@ public class IndexManager {
                 writeIntToBlock(node.children.get(i), indexBlock);
             }
         }
+        indexBlock.isDirty = true;
     }
 
     public static void writeFloatToBlock(TreeNode<Float> node, Block indexBlock)
@@ -416,25 +449,25 @@ public class IndexManager {
         }
         else if (node.nodeType == NodeType.LEAF)
         {
-            indexBlock.WriteInt(0, offset);  //0 for leaf node
-            indexBlock.WriteInt(node.numOfKeys, offset);  //size
-            offset += 2 * Integer.SIZE / 8;
+            indexBlock.WriteInt(0, 0);  //0 for leaf node
+            indexBlock.WriteInt(node.numOfKeys, 4);  //size
+            offset = 8;
             for (int i = 0; i < node.numOfKeys; i++)
             {
                 indexBlock.WriteFloat(node.keys.get(i), offset);
-                indexBlock.WriteInt(node.values.get(i), offset + fTree.keySize);
-                offset += fTree.keySize + Integer.SIZE / 8;
+                indexBlock.WriteInt(node.values.get(i), offset + 4);
+                offset += 8;
             }
         }
         else
         {
-            indexBlock.WriteInt(1, offset);  //1 for internal node
-            indexBlock.WriteInt(node.numOfKeys, offset);  //size
-            offset += 2 * Integer.SIZE / 8;
+            indexBlock.WriteInt(0, 0);  //0 for leaf node
+            indexBlock.WriteInt(node.numOfKeys, 4);  //size
+            offset = 8;
             for (int i = 0; i < node.numOfKeys; i++)
             {
                 indexBlock.WriteFloat(node.keys.get(i), offset);
-                offset += fTree.keySize;
+                offset += 4;
             }
             for (int i = 0; i <= node.numOfKeys; i++)
             {
@@ -442,6 +475,7 @@ public class IndexManager {
                 writeFloatToBlock(node.children.get(i), indexBlock);
             }
         }
+        indexBlock.isDirty = true;
     }
 
     public static void writeStringToBlock(TreeNode<String> node, Block indexBlock)
@@ -453,21 +487,21 @@ public class IndexManager {
         }
         else if (node.nodeType == NodeType.LEAF)
         {
-            indexBlock.WriteInt(0, offset);  //0 for leaf node
-            indexBlock.WriteInt(node.numOfKeys, offset);  //size
-            offset += 2 * Integer.SIZE / 8;
+            indexBlock.WriteInt(0, 0);  //0 for leaf node
+            indexBlock.WriteInt(node.numOfKeys, 4);  //size
+            offset = 8;
             for (int i = 0; i < node.numOfKeys; i++)
             {
                 indexBlock.WriteString(node.keys.get(i), offset);
                 indexBlock.WriteInt(node.values.get(i), offset + sTree.keySize);
-                offset += sTree.keySize + Integer.SIZE / 8;
+                offset += sTree.keySize + 4;
             }
         }
         else
         {
-            indexBlock.WriteInt(1, offset);  //1 for internal node
-            indexBlock.WriteInt(node.numOfKeys, offset);  //size
-            offset += 2 * Integer.SIZE / 8;
+            indexBlock.WriteInt(1, 0);  //1 for internal node
+            indexBlock.WriteInt(node.numOfKeys, 4);  //size
+            offset = 8;
             for (int i = 0; i < node.numOfKeys; i++)
             {
                 indexBlock.WriteString(node.keys.get(i), offset);
@@ -479,5 +513,6 @@ public class IndexManager {
                 writeStringToBlock(node.children.get(i), indexBlock);
             }
         }
+        indexBlock.isDirty = true;
     }
 }

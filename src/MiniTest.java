@@ -20,8 +20,7 @@ public class MiniTest {
 				sql += State;
 				System.out.println(sql);
 				if(sql.equals("quit")){
-					BufferManager.FlushAll();
-					BufferManager.SaveTables();
+					BufferManager.quit();
 					break;
 				}
 				

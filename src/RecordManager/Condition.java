@@ -39,7 +39,7 @@ public class Condition
 		boolean res = Satisfy(tup, Row, Attributes.get(index), Numbers.get(index), Ops.get(index));
 		index++;
 		System.out.println("here to judge");
-		while(Conjunctions != null && Conjunctions.size() > index) {
+		while(Conjunctions != null && Conjunctions.size() + 1 > index) {
 			String Con = Conjunctions.get(index-1);
 			if(Con.equals("and")) {
 				res &= Satisfy(tup, Row, Attributes.get(index), Numbers.get(index), Ops.get(index));
@@ -63,8 +63,8 @@ public class Condition
 				float att = Float.parseFloat(tup.GetData(Row.GetIndex(Attribute)));
 				res = (num == att);
 			}else if(Type == FieldType.INT) {
-				int num = Integer.getInteger(Number);
-				int att = Integer.getInteger(tup.GetData(Row.GetIndex(Attribute)));
+				int num = Integer.parseInt(Number);
+				int att = Integer.parseInt(tup.GetData(Row.GetIndex(Attribute)));
 				res = (num == att);
 			}else if(Type == FieldType.STRING) {
 				System.out.println("String equal");
@@ -80,8 +80,8 @@ public class Condition
 				float att = Float.parseFloat(tup.GetData(Row.GetIndex(Attribute)));
 				res = (num != att);
 			}else if(Type == FieldType.INT) {
-				int num = Integer.getInteger(Number);
-				int att = Integer.getInteger(tup.GetData(Row.GetIndex(Attribute)));
+				int num = Integer.parseInt(Number);
+				int att = Integer.parseInt(tup.GetData(Row.GetIndex(Attribute)));
 				res = (num != att);
 			}else if(Type == FieldType.STRING) {
 				String att = tup.GetData(Row.GetIndex(Attribute));
@@ -93,8 +93,8 @@ public class Condition
 				float att = Float.parseFloat(tup.GetData(Row.GetIndex(Attribute)));
 				res = (att < num);
 			}else if(Type == FieldType.INT) {
-				int num = Integer.getInteger(Number);
-				int att = Integer.getInteger(tup.GetData(Row.GetIndex(Attribute)));
+				int num = Integer.parseInt(Number);
+				int att = Integer.parseInt(tup.GetData(Row.GetIndex(Attribute)));
 				res = (att < num);
 			}else if(Type == FieldType.STRING) {
 				String att = tup.GetData(Row.GetIndex(Attribute));
@@ -106,8 +106,8 @@ public class Condition
 				float att = Float.parseFloat(tup.GetData(Row.GetIndex(Attribute)));
 				res = (att > num);
 			}else if(Type == FieldType.INT) {
-				int num = Integer.getInteger(Number);
-				int att = Integer.getInteger(tup.GetData(Row.GetIndex(Attribute)));
+				int num = Integer.parseInt(Number);
+				int att = Integer.parseInt(tup.GetData(Row.GetIndex(Attribute)));
 				res = (att > num);
 			}else if(Type == FieldType.STRING) {
 				String att = tup.GetData(Row.GetIndex(Attribute));
@@ -119,8 +119,8 @@ public class Condition
 				float att = Float.parseFloat(tup.GetData(Row.GetIndex(Attribute)));
 				res = (att <= num);
 			}else if(Type == FieldType.INT) {
-				int num = Integer.getInteger(Number);
-				int att = Integer.getInteger(tup.GetData(Row.GetIndex(Attribute)));
+				int num = Integer.parseInt(Number);
+				int att = Integer.parseInt(tup.GetData(Row.GetIndex(Attribute)));
 				res = (att <= num);
 			}else if(Type == FieldType.STRING) {
 				String att = tup.GetData(Row.GetIndex(Attribute));
@@ -132,8 +132,8 @@ public class Condition
 				float att = Float.parseFloat(tup.GetData(Row.GetIndex(Attribute)));
 				res = (att >= num);
 			}else if(Type == FieldType.INT) {
-				int num = Integer.getInteger(Number);
-				int att = Integer.getInteger(tup.GetData(Row.GetIndex(Attribute)));
+				int num = Integer.parseInt(Number);
+				int att = Integer.parseInt(tup.GetData(Row.GetIndex(Attribute)));
 				res = (att >= num);
 			}else if(Type == FieldType.STRING) {
 				String att = tup.GetData(Row.GetIndex(Attribute));

@@ -32,6 +32,7 @@ public class Block {
 			File.seek(fileOffset);
 //			System.out.println("fileOffset = " + fileOffset);
 			File.read(this.data, 0, Block.Size);
+			File.close();
 		} catch (FileNotFoundException e) {
 			System.out.println("Error happened in openning the file");
 			e.printStackTrace();

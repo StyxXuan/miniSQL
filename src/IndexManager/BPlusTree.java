@@ -694,7 +694,12 @@ public class BPlusTree <T extends Comparable<T>>
             System.out.print("[");
             for (int i = 0; i < node.numOfKeys; i++)
             {
-                System.out.print(node.keys.get(i) + ",");
+                System.out.print(node.keys.get(i));
+                if (node.nodeType == NodeType.LEAF)
+                {
+                    System.out.print(":" + node.values.get(i));
+                }
+                System.out.print(",");
             }
             System.out.print("]");
             //Add children of internal node

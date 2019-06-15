@@ -53,11 +53,12 @@ public class BufferManager {
 				index +=4;
 				byte []a = new byte[TableAttLength]; 
 				File.seek(index);
-				File.read(b, 0, TableAttLength);
+				File.read(a, 0, TableAttLength);
 				String TableAtt = new String(a, "UTF-8");
 				index += Indexlength;
 				indexs.put(IndexName, TableAtt);
 			}
+			File.close();
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -131,6 +132,7 @@ public class BufferManager {
 					index += 4;
 				}
 			}
+			File.close();
 		} catch (FileNotFoundException e) {
 			System.out.println("Error happened in openning the file");
 			e.printStackTrace();
@@ -140,7 +142,7 @@ public class BufferManager {
 		}
 	}
 	
-	static public void SavaIndexs() {
+	static public void SaveIndexs() {
 		RandomAccessFile File;
 		try {
 			int index = 0;
@@ -165,9 +167,10 @@ public class BufferManager {
 				File.write(a.length);
 				index +=4;
 				File.seek(index);
-				File.write(b, 0, b.length);
-				index += b.length;
-				}
+				File.write(a, 0, a.length);
+				index += a.length;
+			}
+			File.close();
 		} catch (FileNotFoundException e) {
 			System.out.println("Error happened in openning the file");
 			e.printStackTrace();
@@ -246,6 +249,7 @@ public class BufferManager {
 				Table table = new Table(TableName, row, RecNum);
 				tables.put(TableName, table);
 			}
+			File.close();
 		} catch (FileNotFoundException e) {
 			System.out.println("Error happened in openning the file");
 			e.printStackTrace();
@@ -258,7 +262,7 @@ public class BufferManager {
 	static public void quit() throws IOException {
 		FlushAll();
 		SaveTables();
-		SavaIndexs();
+		SaveIndexs();
 	}
 	
 	static public void FlushAll() {

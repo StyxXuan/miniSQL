@@ -35,31 +35,34 @@ public class API{
 		boolean Aff = true;
 		double Time = 0;
 		long startTime = System.currentTimeMillis();
+		Table tb = BufferManager.tables.get(request.tablename);
+		for (int i = 0; i < tb.Row.attrinum; i++)
+		{
+			if (tb.Row.attlist.get(i).hasIndex)
+			{
+				IndexManager.dropIndex(request.tablename + "_" + tb.Row.attlist.get(i).attriName);
+			}
+
+		}
 		RecordManager.dropTable(request.tablename);
 		long endTime = System.currentTimeMillis();
 		Time = endTime - startTime;
 		Response Res = new Response(Aff, Time);
 		return Res;
 	}
-	
+
 	static public Response createIndex(Request request) {
-		Table tb = BufferManager.tables.get(request.tablename);
-		Attribute attribute = tb.GetAttribute(request.attributename);
 		boolean Aff = true;
 		double Time = 0;
 		try
 		{
-			if (attribute.hasIndex || !attribute.isUnique)
+			long startTime = System.currentTimeMillis();
+			boolean flag = IndexManager.createIndex(request.tablename, request.attributename, request.indexname);
+			long endTime = System.currentTimeMillis();
+			Time = endTime - startTime;
+			if (!flag)
 			{
 				throw new Exception();
-			}
-			else
-			{
-				long startTime = System.currentTimeMillis();
-				IndexManager.createIndex(tb, attribute);
-				long endTime = System.currentTimeMillis();
-				Time = endTime - startTime;
-				attribute.hasIndex = true;
 			}
 		}
 		catch (Exception e)
@@ -69,31 +72,25 @@ public class API{
 		}
 		return new Response(Aff, Time);
 	}
-	
+
 	static public Response dropIndex(Request request) {
-		Table tb = BufferManager.tables.get(request.tablename);
-		Attribute attribute = tb.GetAttribute(request.attributename);
 		boolean Aff = true;
 		double Time = 0;
 		try
 		{
-		    if (attribute.hasIndex)
-		    {
 			long startTime = System.currentTimeMillis();
-			IndexManager.dropIndex(tb, attribute);
+			boolean flag = IndexManager.dropIndex(request.indexname);
 			long endTime = System.currentTimeMillis();
 			Time = endTime - startTime;
-			attribute.hasIndex = false;
-		    }
-		    else
-		    {
-			throw new Exception();
-		    }
+			if (!flag)
+			{
+				throw new Exception();
+			}
 		}
 		catch (Exception e)
 		{
-		    System.out.println("Index not exists!");
-		    Aff = false;
+			System.out.println("Index not exists!");
+			Aff = false;
 		}
 		return new Response(Aff, Time);
 	}
@@ -105,23 +102,23 @@ public class API{
 		Table table = BufferManager.tables.get(request.tablename);
 		Vector<Tuple> Datas = new Vector<Tuple>();
 		System.out.println("now selecting");
-//		if(request.condition.Attributes.size() == 1 && request.condition.Ops.get(0) == Condition.Operation.EQUAL){
-//			Attribute Att = table.GetAttribute(request.condition.Attributes.get(0));
-//			int FileOff = IndexManager.select(table, Att, request.condition.Numbers.get(0));
-//			Tuple tup = RecordManager.select(table, FileOff);
-//			Datas.add(tup);
-//		}else {
-		if(request.type == 3) {
-			Datas = RecordManager.SelectAll(table);
+		Attribute Att;
+		if(request.condition.Attributes.size() == 1 && request.condition.Ops.get(0) == Condition.Operation.EQUAL &&
+				(Att = table.GetAttribute(request.condition.Attributes.get(0))).hasIndex){
+			int FileOff = IndexManager.select(table, Att, request.condition.Numbers.get(0));
+			Tuple tup = RecordManager.select(table, FileOff * (table.Row.size() + 4));
+			Datas.add(tup);
+		}else {
+			if (request.type == 3) {
+				Datas = RecordManager.SelectAll(table);
+			} else if (request.type == 4) {
+				Datas = RecordManager.select(table, request.condition);
+				//System.out.println(request.condition.Ops.elementAt(1));
+				System.out.println("data size = " + Datas.size());
+			}
 		}
-		
-		else if(request.type == 4) {
-			Datas = RecordManager.select(table, request.condition);
-			System.out.println("data size = " + Datas.size());
-		}	
-		
 		long endTime = System.currentTimeMillis();
-		Time =  endTime - startTime;
+		Time = endTime - startTime;
 		Response Res = new Response(Aff, Time, Datas, table);
 		System.out.println("data size = " + Res.Tups.size());
 		return Res;
@@ -151,7 +148,15 @@ public class API{
 		long startTime = System.currentTimeMillis();
 		Table table = BufferManager.tables.get(request.tablename);
 //		IndexManager.delete(table, attribute, key)
-		int DeletedNum = RecordManager.delete(table, request.condition);
+		int DeletedNum = 0;
+		if(request.type == 9)
+		{
+			DeletedNum = RecordManager.delete(table, request.condition);
+		}
+		else
+		{
+			DeletedNum = RecordManager.deleteAll(table);
+		}
 		table.RecordNum -= DeletedNum;
 		long endTime = System.currentTimeMillis();
 		Time = endTime - startTime;

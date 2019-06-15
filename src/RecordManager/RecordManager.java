@@ -115,12 +115,10 @@ public class RecordManager {
 
 	public static Vector<Tuple>select(Table table, Condition condition){
 		String fileName = BufferManager.tableFileNameGet(table.TableName);
-		int TupSize = table.Row.size();
+		int TupSize = table.Row.size() + 4;
 		int MaxTupNum = BufferManager.Max_Block / TupSize;
-		int CountTup = 0;
-		int RowIndex = 0;
+		int CountTup = 0, RowIndex = 0, AttIndex = 0;
 		Block b = BufferManager.FindBlock(fileName, 0);
-		System.out.println(table.RecordNum);
 		Vector<Tuple> Res = new Vector<Tuple>();
 		System.out.println("recnum = " + table.RecordNum);
 		while(CountTup  < table.RecordNum) {
@@ -135,20 +133,19 @@ public class RecordManager {
 				System.out.println("CountTup = " + CountTup);
 				CountTup++;
 				Tuple mid = new Tuple();
-				int AttIndex = 4;
-				
+				AttIndex = 4;
 				for(int i=0; i<table.Row.attrinum; i++) {
 					switch(table.Row.attlist.get(i).Type) {
 					case FLOAT:
-						mid.Data.add(Float.toString(b.GetFloat(AttIndex)));
+						mid.Data.add(Float.toString(b.GetFloat(AttIndex + RowIndex * TupSize)));
 						AttIndex += 4;
 						break;
 					case INT:
-						mid.Data.add(Integer.toString(b.GetInt(AttIndex)));
+						mid.Data.add(Integer.toString(b.GetInt(AttIndex + RowIndex * TupSize)));
 						AttIndex += 4;
 						break;
 					case STRING:
-						mid.Data.add(b.GetString(AttIndex, table.Row.attlist.get(i).length));
+						mid.Data.add(b.GetString(AttIndex + RowIndex * TupSize, table.Row.attlist.get(i).length));
 						AttIndex += table.Row.attlist.get(i).length;
 						break;
 					default:
@@ -166,10 +163,11 @@ public class RecordManager {
 	
 	public static Vector<Tuple> SelectAll(Table table) {
 		String fileName = BufferManager.tableFileNameGet(table.TableName);
-		int TupSize = table.Row.size();
+		int TupSize = table.Row.size() + 4;
 		int MaxTupNum = BufferManager.Max_Block / TupSize;
 		int CountTup = 0;
 		int RowIndex = 0;
+		int AttIndex = 0;
 		Block b = BufferManager.FindBlock(fileName, 0);
 		System.out.println(table.RecordNum);
 		Vector<Tuple> Res = new Vector<Tuple>();
@@ -186,10 +184,10 @@ public class RecordManager {
 			System.out.println("RowIndex = " + RowIndex);
 			if(b.GetInt(RowIndex * TupSize) != 0) {
 				System.out.println("CountTup = " + CountTup);
+				System.out.println(b.GetInt(RowIndex * TupSize));
 				CountTup++;
+				AttIndex = 4;
 				Tuple mid = new Tuple();
-				int AttIndex = 4;
-				
 				for(int i=0; i<table.Row.attrinum; i++) {
 					switch(table.Row.attlist.get(i).Type) {
 					case FLOAT:
@@ -220,8 +218,10 @@ public class RecordManager {
 		Block b = BufferManager.FindBlock(BufferManager.tableFileNameGet(table.TableName), Offset);
 		Vector<String>Data = new Vector<String>();
 		List<Attribute> atts = table.Row.attlist;
+		int AttIndex = 4;
 		for(int i=0; i<atts.size(); i++) {
-			String Att = b.GetString(Offset, atts.get(i).length);
+			String Att = b.GetString(Offset + AttIndex, atts.get(i).length);
+			AttIndex += atts.get(i).length;
 			Data.addElement(Att);
 		}
 		Tuple Selected = new Tuple(1, Data);
@@ -254,7 +254,7 @@ public class RecordManager {
 	
 	public static int delete(Table table, Condition condition) {
 		String fileName = BufferManager.tableFileNameGet(table.TableName);
-		int TupSize = table.Row.size();
+		int TupSize = table.Row.size() + 4;
 		int MaxTupNum = BufferManager.Max_Block / TupSize;
 		int CountTup = 0;
 		int CountDelete = 0;
@@ -276,15 +276,15 @@ public class RecordManager {
 				for(int i=0; i<table.Row.attrinum; i++) {
 					switch(table.Row.attlist.get(i).Type) {
 					case FLOAT:
-						mid.Data.add(Float.toString(b.GetFloat(AttIndex)));
+						mid.Data.add(Float.toString(b.GetFloat(AttIndex + RowIndex * TupSize)));
 						AttIndex += 4;
 						break;
 					case INT:
-						mid.Data.add(Integer.toString(b.GetInt(AttIndex)));
+						mid.Data.add(Integer.toString(b.GetInt(AttIndex + RowIndex * TupSize)));
 						AttIndex += 4;
 						break;
 					case STRING:
-						mid.Data.add(b.GetString(AttIndex, table.Row.attlist.get(i).length));
+						mid.Data.add(b.GetString(AttIndex + RowIndex * TupSize, table.Row.attlist.get(i).length));
 						AttIndex += table.Row.attlist.get(i).length;
 						break;
 					default:
@@ -317,6 +317,34 @@ public class RecordManager {
 		return Sum;
 	}
 
-	
+	public static int deleteAll(Table table) {
+		String fileName = BufferManager.tableFileNameGet(table.TableName);
+		int TupSize = table.Row.size() + 4;
+		int MaxTupNum = BufferManager.Max_Block / TupSize;
+		int CountTup = 0;
+		int CountDelete = 0;
+		int RowIndex = 0;
+		Block b = BufferManager.FindBlock(fileName, 0);
+		System.out.println(table.RecordNum);
+
+		while(CountTup  < table.RecordNum) {
+			if(RowIndex >= MaxTupNum) {
+				b = BufferManager.GetNextBlock(b);
+				RowIndex = 0;
+			}
+			if(b.GetInt(RowIndex * TupSize) != 0) {
+				System.out.println("CountTup = " + CountTup);
+				CountTup++;
+
+				System.out.println("satisfication judgement");
+				b.WriteInt(0, (RowIndex * TupSize));
+				b.isDirty = true;
+				b.isValid = true;
+				CountDelete++;
+			}
+			RowIndex++;
+		}
+		return CountDelete;
+	}
 	
 }
