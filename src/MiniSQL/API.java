@@ -31,6 +31,7 @@ public class API{
 		return Res;
 	}
 	
+	
 	static public Response dropTable(Request request) {
 		boolean Aff = true;
 		double Time = 0;
@@ -163,5 +164,5 @@ public class API{
 		Response Res = new Response(Aff, Time);
 		return Res;
 	}
-
+	
 }
