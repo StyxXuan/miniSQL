@@ -26,6 +26,11 @@ public class MiniTest {
 				
 				else if(sql.contains(";")) {
 					Request Res = Interpreter.parse(sql);
+					if(Res == null) {
+						System.out.println("execute file right");
+						sql = "";
+						continue;
+					}
 					Response Respon = Interpreter.excute(Res);
 					if(Respon.isSelect)
 						Respon.PrintInfo(Respon.table);

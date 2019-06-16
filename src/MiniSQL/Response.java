@@ -6,8 +6,8 @@ import RecordManager.Tuple;
 import RecordManager.FieldType;
 import RecordManager.Table;
 public class Response {
-	private boolean Affected;
-	private double time;
+	public boolean Affected;
+	public double time;
 	public Table table = new Table();
 	public Vector<Tuple>Tups = new Vector<Tuple>();
 	public boolean isSelect;

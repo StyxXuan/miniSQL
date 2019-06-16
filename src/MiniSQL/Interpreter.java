@@ -1,8 +1,11 @@
 package MiniSQL;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.util.Vector;
 
-import BufferManager.BufferManager;
 import RecordManager.Condition;
 import RecordManager.Condition.Operation;
 import RecordManager.Attribute;
@@ -547,14 +550,43 @@ drop index stu_index;
 		// file
 		else if(word.equals("execfile"))
 		{
+			System.out.println("Now execfile");
 			index = 0;
-			String filename = getWord(sql);
-			parses.addElement(filename);
-			Request r = new Request(11, parses, null, null, 0);
-			return r;
+			String filename = sql.split(" ")[1].replace(" ", "");
+			System.out.println(filename);
+			File file = new File("DBFile/insert.txt");
+			System.out.println(file.exists());
+	        FileInputStream is = null;
+	        StringBuilder stringBuilder = null;
+	        try {
+	            if (file.length() != 0) {
+	            	System.out.println("here");
+	                is = new FileInputStream(file);
+	                InputStreamReader streamReader = new InputStreamReader(is);
+	                BufferedReader reader = new BufferedReader(streamReader);
+	                String line;
+	                stringBuilder = new StringBuilder();
+	                while ((line = reader.readLine()) != null) {
+	                	stringBuilder.append(line);
+	                }
+	                System.out.println(line);
+	                reader.close();
+	                is.close();
+	            }
+	        } catch (Exception e) {
+	        	System.out.println("File Execute error");
+	            e.printStackTrace();
+	       }
+		    String Commands = stringBuilder.toString();
+		    System.out.println(Commands);
+		    String []Command = Commands.split(";");
+		    for(int i=0; i<Command.length; i++) {
+		    	System.out.println(Command[i]);
+		    	excute(parse(Command[i] + ";"));
+		    }
+			return null;
 		}
-		else
-		{
+		else{
 			System.out.println("Error in syntax");
 			index = 0;
 			return null;
@@ -606,7 +638,6 @@ drop index stu_index;
 	
 	static String getWord(String sql)
 	{
-		int i;
 		String word = "";
 		int idx1, idx2;
 		while((sql.charAt(index) == ' ' || sql.charAt(index) == '\t' || 
