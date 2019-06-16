@@ -15,15 +15,20 @@ import CatalogManager.*;
 public class Interpreter{
 	static int index = 0;
 	/*
-create table student (sno char(8), sname char(16) unique, sage int, sgender char (1),primary key ( sno ));
-insert into student values('12345671', '1234567890123451', 12, '1');
+execfile DBFile/insert1.txt;
+execfile DBFile/insert2.txt;
+create table student (sno char(8), sname char(16), sage int, sgender char (1),primary key ( sno ));
+insert into student values('12345629', '1234567890123451', 12, '1');
+insert into student values('12345672', '1234567890123452', 13, '1');
+insert into student values('12345673', '1234567890123453', 14, '1');
+insert into student values('12345675', '1234567890123456', 15, '1');
 drop table student;
 delete from student;
-delete from student where sno = '12345671';
+delete from student where sno > '12345620';
 select * from student;
 select * from student where sname = '1234567890123451';
-select * from student where sno = '12345671';
-select * from student where sno = '12345671' and sage = 12;
+select * from student where sno = '12345610';
+delete from student where sno = '12345671' or sage = 13;
 create index stu_index on student(sname);
 drop index stu_index;
 	 */

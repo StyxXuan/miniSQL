@@ -352,8 +352,6 @@ public class BufferManager {
 	static public Block FindBlock(String FileName, int offset) {
 		int BlockOff = offset / Max_Block;
 		for(int i=0; i<Max_Block; i++){
-			System.out.println(Buffer[i].file + " " + FileName);
-			System.out.println(Buffer[i].fileOffset + " " + offset);
 			int BufferBlockOff = Buffer[i].fileOffset / Max_Block;
 			if((Buffer[i].file.equals(FileName)) && (BufferBlockOff == BlockOff))
 				return Buffer[i];

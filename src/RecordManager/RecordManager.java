@@ -6,6 +6,7 @@ import java.io.IOException;
 
 import BufferManager.Block;
 import BufferManager.BufferManager;
+import IndexManager.IndexManager;
 
 public class RecordManager {
 
@@ -73,8 +74,8 @@ public class RecordManager {
 		
 		return ft.delete() & Cat.delete();
 	}
-	
-	public static void insert(Table table, Tuple tup) {
+
+	public static int insert(Table table, Tuple tup) {
 		String fileName = BufferManager.tableFileNameGet(table.TableName);
 		System.out.println(fileName);
 		int TupSize = table.Row.size() + 4;
@@ -85,6 +86,7 @@ public class RecordManager {
 		int RowIndex = 0;
 		int Valid = b.GetInt(RowIndex * TupSize);
 		while(Valid != 0) {
+			RowIndex++;
 			if(RowIndex >= MaxTupNum) {
 				System.out.println("Now is getting the next block");
 				b = BufferManager.GetNextBlock(b);
@@ -92,11 +94,9 @@ public class RecordManager {
 				Valid = b.GetInt(RowIndex * TupSize);
 				continue;
 			}
-			RowIndex++;
 			Valid = b.GetInt(RowIndex * TupSize);
 			System.out.println("RowIndex = " + RowIndex + " " + Valid);
 		}
-		
 		b.WriteInt(1, RowIndex * TupSize);
 		System.out.println("b.read" + b.GetInt(RowIndex * TupSize));
 		b.isValid = false;
@@ -104,8 +104,19 @@ public class RecordManager {
 		System.out.println("b.read" + b.GetInt(RowIndex * TupSize + 4));
 		b.isDirty = true;
 		table.RecordNum++;
+		for (int i = 0; i < table.Row.attrinum; i++)
+		{
+			if (table.Row.attlist.get(i).hasIndex)
+			{
+				boolean flag = IndexManager.insert(table.TableName, table.Row.attlist.get(i).attriName, tup.Data.get(i), RowIndex * TupSize);
+				if (!flag)
+				{
+					System.out.println("Insert index failed while inserting record!");
+				}
+			}
+		}
+		return RowIndex * TupSize + b.fileOffset;
 	}
-	
 	
 	public static void insert(Table table, List<Tuple> tups)
 	{
@@ -207,7 +218,6 @@ public class RecordManager {
 					default:
 						break;
 					}
-					System.out.println("data = " + mid.Data.get(i));
 				}
 				Res.add(mid);
 			}
@@ -215,16 +225,29 @@ public class RecordManager {
 		}
 		return Res;
 	}
-	
+
 	public static Tuple select(Table table, int Offset){
 		Block b = BufferManager.FindBlock(BufferManager.tableFileNameGet(table.TableName), Offset);
 		Vector<String>Data = new Vector<String>();
-		List<Attribute> atts = table.Row.attlist;
 		int AttIndex = 4;
-		for(int i=0; i<atts.size(); i++) {
-			String Att = b.GetString(Offset + AttIndex, atts.get(i).length);
-			AttIndex += atts.get(i).length;
-			Data.addElement(Att);
+		System.out.println(b.GetInt(0));
+		for(int i=0; i<table.Row.attrinum; i++) {
+			switch(table.Row.attlist.get(i).Type) {
+				case FLOAT:
+					Data.add(Float.toString(b.GetFloat(AttIndex + (Offset % BufferManager.Max_Block))));
+					AttIndex += 4;
+					break;
+				case INT:
+					Data.add(Integer.toString(b.GetInt(AttIndex + (Offset % BufferManager.Max_Block))));
+					AttIndex += 4;
+					break;
+				case STRING:
+					Data.add(b.GetString(AttIndex + (Offset % BufferManager.Max_Block), table.Row.attlist.get(i).length));
+					AttIndex += table.Row.attlist.get(i).length;
+					break;
+				default:
+					break;
+			}
 		}
 		Tuple Selected = new Tuple(1, Data);
 		return Selected;
@@ -265,7 +288,7 @@ public class RecordManager {
 		System.out.println(table.RecordNum);
 		int AttIndex;
 		while(CountTup  < table.RecordNum) {
-			if(RowIndex > MaxTupNum) {
+			if(RowIndex >= MaxTupNum) {
 				b = BufferManager.GetNextBlock(b);
 				RowIndex = 0;
 			}
@@ -297,6 +320,12 @@ public class RecordManager {
 				System.out.println("satisfication judgement");
 				if(condition.Satisfy(mid, table.Row)) {
 					System.out.println("found the tuple");
+					for(int i=0; i < table.Row.attrinum; i++) {
+						if (table.Row.attlist.get(i).hasIndex)
+						{
+							IndexManager.delete(table.TableName, table.Row.attlist.get(i).attriName, mid.Data.get(i));
+						}
+					}
 					b.WriteInt(0, (RowIndex * TupSize));
 					CountDelete++;
 				}

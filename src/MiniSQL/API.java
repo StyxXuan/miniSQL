@@ -19,9 +19,14 @@ public class API{
 		
 		try {
 			long startTime = System.currentTimeMillis();
-			System.out.println(request.tablename);
 			RecordManager.createTable(request.tablename, Atts);
-			System.out.println(BufferManager.tables.size());
+			for (int i = 0; i < Atts.size(); i++)
+			{
+				if (Atts.get(i).isPrimary)
+				{
+					IndexManager.createIndex(request.tablename, Atts.get(i).attriName, request.tablename + "_" + Atts.get(i).attriName);
+				}
+			}
 			long endTime = System.currentTimeMillis();
 			Time = endTime - startTime;
 		} catch (IOException e) {
@@ -43,7 +48,6 @@ public class API{
 			{
 				IndexManager.dropIndex(request.tablename + "_" + tb.Row.attlist.get(i).attriName);
 			}
-
 		}
 		RecordManager.dropTable(request.tablename);
 		long endTime = System.currentTimeMillis();
@@ -81,6 +85,7 @@ public class API{
 		{
 			long startTime = System.currentTimeMillis();
 			boolean flag = IndexManager.dropIndex(request.indexname);
+			BufferManager.indexs.remove(request.indexname);
 			long endTime = System.currentTimeMillis();
 			Time = endTime - startTime;
 			if (!flag)
@@ -106,22 +111,27 @@ public class API{
 		Attribute Att;
 		if(request.condition.Attributes.size() == 1 && request.condition.Ops.get(0) == Condition.Operation.EQUAL &&
 				(Att = table.GetAttribute(request.condition.Attributes.get(0))).hasIndex){
-			int FileOff = IndexManager.select(table, Att, request.condition.Numbers.get(0));
-			Tuple tup = RecordManager.select(table, FileOff * (table.Row.size() + 4));
-			Datas.add(tup);
+			int FileOfs = IndexManager.select(table, Att, request.condition.Numbers.get(0));
+			if (FileOfs >= 0)
+			{
+				Tuple tup = RecordManager.select(table, FileOfs);
+				Datas.add(tup);
+			}
+			else
+			{
+				Aff = false;
+			}
 		}else {
 			if (request.type == 3) {
 				Datas = RecordManager.SelectAll(table);
 			} else if (request.type == 4) {
 				Datas = RecordManager.select(table, request.condition);
-				//System.out.println(request.condition.Ops.elementAt(1));
-				System.out.println("data size = " + Datas.size());
 			}
 		}
 		long endTime = System.currentTimeMillis();
 		Time = endTime - startTime;
 		Response Res = new Response(Aff, Time, Datas, table);
-		System.out.println("data size = " + Res.Tups.size());
+		//System.out.println("data size = " + Res.Tups.size());
 		return Res;
 	}
 	
@@ -129,16 +139,41 @@ public class API{
 		boolean Aff = true;
 		double Time = 0;
 		Table table = BufferManager.tables.get(request.tablename);
-		System.out.println(request.tablename);
-		System.out.println(BufferManager.tables.size());
 		if(table == null) {
-			System.out.println("table not found");
+			System.out.println("Table not found");
 			return  new Response(false, 0);
 		}
 		
 		Tuple tup = new Tuple(1, request.insertValue);
 		System.out.println("Now inserting ele");
-		RecordManager.insert(table, tup);
+		long startTime = System.currentTimeMillis();
+		int i = 0;
+		for (i = 0; i < table.Row.attrinum; i++)
+		{
+			if (table.Row.attlist.get(i).isPrimary || table.Row.attlist.get(i).isUnique)
+			{
+				Condition condition = new Condition(table.Row.attlist.get(i).attriName, request.insertValue.get(i),Condition.Operation.EQUAL);
+				Vector<String> parses = new Vector<String>();
+				parses.add(table.TableName);
+				Request req = new Request(4, parses, condition, null, 0);
+				Response response = API.select(req);
+				if (response.Tups.size() > 0)
+				{
+					System.out.println("Duplicated value!");
+					break;
+				}
+			}
+		}
+		if (i >= table.Row.attrinum)
+		{
+			RecordManager.insert(table, tup);
+		}
+		else
+		{
+			Aff = false;
+		}
+		long endTime = System.currentTimeMillis();
+		Time = endTime - startTime;
 		Response Res = new Response(Aff, Time);
 		return Res;
 	}
@@ -157,6 +192,13 @@ public class API{
 		else
 		{
 			DeletedNum = RecordManager.deleteAll(table);
+			for (int i = 0; i < table.Row.attrinum; i++)
+			{
+				if (table.Row.attlist.get(i).hasIndex)
+				{
+					IndexManager.deleteAll(table.TableName,table.Row.attlist.get(i).attriName);
+				}
+			}
 		}
 		table.RecordNum -= DeletedNum;
 		long endTime = System.currentTimeMillis();
