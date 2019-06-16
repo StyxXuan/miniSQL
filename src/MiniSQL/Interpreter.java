@@ -552,9 +552,9 @@ drop index stu_index;
 		{
 			System.out.println("Now execfile");
 			index = 0;
-			String filename = sql.split(" ")[1].replace(" ", "");
+			String filename = sql.split(" ")[1].replace(" ", "").replace(";", "");
 			System.out.println(filename);
-			File file = new File("DBFile/insert.txt");
+			File file = new File(filename);
 			System.out.println(file.exists());
 	        FileInputStream is = null;
 	        StringBuilder stringBuilder = null;
