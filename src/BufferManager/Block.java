@@ -12,7 +12,7 @@ import java.io.UnsupportedEncodingException;
 
 
 public class Block {
-	public static int Size = 4096;
+	public static int Size = BufferManager.Max_Block;
 	String file = "";
 	public int fileOffset = 0;
 	public boolean isDirty = false;

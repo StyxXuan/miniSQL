@@ -16,7 +16,7 @@ create table student (sno char(8), sname char(16) unique, sage int, sgender char
 insert into student values('12345671', '1234567890123451', 12, '1');
 drop table student;
 delete from student;
-delete from student where sno = '12345672';
+delete from student where sno = '12345671';
 select * from student;
 select * from student where sname = '1234567890123451';
 select * from student where sno = '12345671';

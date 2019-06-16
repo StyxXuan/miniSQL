@@ -78,7 +78,7 @@ public class RecordManager {
 		String fileName = BufferManager.tableFileNameGet(table.TableName);
 		System.out.println(fileName);
 		int TupSize = table.Row.size() + 4;
-		int MaxTupNum = BufferManager.Max_Block / TupSize;
+		int MaxTupNum = BufferManager.Max_Block / TupSize - 1;
 		System.out.println("max tup num = " + MaxTupNum);
 		// Find the free space
 		Block b = BufferManager.FindBlock(fileName, 0);
@@ -86,8 +86,11 @@ public class RecordManager {
 		int Valid = b.GetInt(RowIndex * TupSize);
 		while(Valid != 0) {
 			if(RowIndex >= MaxTupNum) {
+				System.out.println("Now is getting the next block");
 				b = BufferManager.GetNextBlock(b);
 				RowIndex = 0;
+				Valid = b.GetInt(RowIndex * TupSize);
+				continue;
 			}
 			RowIndex++;
 			Valid = b.GetInt(RowIndex * TupSize);
@@ -116,7 +119,7 @@ public class RecordManager {
 	public static Vector<Tuple>select(Table table, Condition condition){
 		String fileName = BufferManager.tableFileNameGet(table.TableName);
 		int TupSize = table.Row.size() + 4;
-		int MaxTupNum = BufferManager.Max_Block / TupSize;
+		int MaxTupNum = BufferManager.Max_Block / TupSize - 1;
 		int CountTup = 0, RowIndex = 0, AttIndex = 0;
 		Block b = BufferManager.FindBlock(fileName, 0);
 		Vector<Tuple> Res = new Vector<Tuple>();
@@ -126,7 +129,6 @@ public class RecordManager {
 				b = BufferManager.GetNextBlock(b);
 				System.out.println("here to get next");
 				System.out.println(b.GetInt(0));
-//				break;
 				RowIndex = 0;
 			}
 			if(b.GetInt(RowIndex * TupSize) != 0) {
@@ -164,7 +166,7 @@ public class RecordManager {
 	public static Vector<Tuple> SelectAll(Table table) {
 		String fileName = BufferManager.tableFileNameGet(table.TableName);
 		int TupSize = table.Row.size() + 4;
-		int MaxTupNum = BufferManager.Max_Block / TupSize;
+		int MaxTupNum = BufferManager.Max_Block / TupSize - 1;
 		int CountTup = 0;
 		int RowIndex = 0;
 		int AttIndex = 0;
@@ -255,15 +257,15 @@ public class RecordManager {
 	public static int delete(Table table, Condition condition) {
 		String fileName = BufferManager.tableFileNameGet(table.TableName);
 		int TupSize = table.Row.size() + 4;
-		int MaxTupNum = BufferManager.Max_Block / TupSize;
+		int MaxTupNum = BufferManager.Max_Block / TupSize -1 ;
 		int CountTup = 0;
 		int CountDelete = 0;
 		int RowIndex = 0;
 		Block b = BufferManager.FindBlock(fileName, 0);
 		System.out.println(table.RecordNum);
-		
+		int AttIndex;
 		while(CountTup  < table.RecordNum) {
-			if(RowIndex >= MaxTupNum) {
+			if(RowIndex > MaxTupNum) {
 				b = BufferManager.GetNextBlock(b);
 				RowIndex = 0;
 			}
@@ -271,7 +273,7 @@ public class RecordManager {
 				System.out.println("CountTup = " + CountTup);
 				CountTup++;
 				Tuple mid = new Tuple();
-				int AttIndex = 4;
+				AttIndex = 4;
 				
 				for(int i=0; i<table.Row.attrinum; i++) {
 					switch(table.Row.attlist.get(i).Type) {
@@ -292,13 +294,10 @@ public class RecordManager {
 					}
 					System.out.println("data = " + mid.Data.get(i));
 				}
-				
 				System.out.println("satisfication judgement");
 				if(condition.Satisfy(mid, table.Row)) {
 					System.out.println("found the tuple");
 					b.WriteInt(0, (RowIndex * TupSize));
-					b.isDirty = true;
-					b.isValid = true;
 					CountDelete++;
 				}
 			}
@@ -320,7 +319,7 @@ public class RecordManager {
 	public static int deleteAll(Table table) {
 		String fileName = BufferManager.tableFileNameGet(table.TableName);
 		int TupSize = table.Row.size() + 4;
-		int MaxTupNum = BufferManager.Max_Block / TupSize;
+		int MaxTupNum = BufferManager.Max_Block / TupSize - 1;
 		int CountTup = 0;
 		int CountDelete = 0;
 		int RowIndex = 0;

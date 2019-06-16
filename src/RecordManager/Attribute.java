@@ -33,6 +33,5 @@ public class Attribute {
 	public void SetIndex() {
 		this.hasIndex = true;
 	}
-	
-	
+		
 }
