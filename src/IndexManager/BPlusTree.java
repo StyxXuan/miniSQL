@@ -681,7 +681,7 @@ public class BPlusTree <T extends Comparable<T>>
         int level = 0;
         TreeNode<T> node, headNode = root;
         queue.add(root);
-        System.out.print("Height: " + height + ", numOfNodes: " + numOfNodes);
+        System.out.print("Height: " + height + ", numOfNodes: " + numOfNodes + "degree:" + degree);
         while (!queue.isEmpty())
         {
             node = queue.get(0);

@@ -12,8 +12,6 @@ public class TableRow {
 	
 	public FieldType GetType(String AttName) {
 		for(int i=0; i<attlist.size(); i++) {
-			System.out.println(attlist.get(i).attriName + " " + AttName);
-			System.out.println(attlist.get(i).Type);
 			if(attlist.get(i).attriName.equals(AttName))
 				return attlist.get(i).Type;
 		}

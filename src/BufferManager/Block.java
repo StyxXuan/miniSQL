@@ -30,7 +30,6 @@ public class Block {
 		try {
 			File = new RandomAccessFile(file, "rw");
 			File.seek(fileOffset);
-//			System.out.println("fileOffset = " + fileOffset);
 			File.read(this.data, 0, Block.Size);
 			File.close();
 		} catch (FileNotFoundException e) {
@@ -54,7 +53,6 @@ public class Block {
 	}
 	
 	public void WriteBack() throws IOException {
-		System.out.println(file);
 		RandomAccessFile File = new RandomAccessFile(file, "rw");
 		File.seek(fileOffset);
 		File.write(data, 0, Block.Size);

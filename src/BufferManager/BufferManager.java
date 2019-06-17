@@ -89,7 +89,6 @@ public class BufferManager {
 			for (Map.Entry<String, Table> entry : tables.entrySet()) {	
 				Table table = entry.getValue();
 				byte []b = table.TableName.getBytes("UTF-8");
-//				System.out.println(b);
 				File.seek(index);
 				File.write(b.length);
 				index +=4;
@@ -154,7 +153,6 @@ public class BufferManager {
 				String IndexName = entry.getKey();
 				String TableAtt = entry.getValue();
 				byte []b = IndexName.getBytes("UTF-8");
-//				System.out.println(b);
 				File.seek(index);
 				File.write(b.length);
 				index +=4;
@@ -162,7 +160,6 @@ public class BufferManager {
 				File.write(b, 0, b.length);
 				index += b.length;
 				byte []a = TableAtt.getBytes("UTF-8");
-//				System.out.println(b);
 				File.seek(index);
 				File.write(a.length);
 				index +=4;
@@ -187,7 +184,6 @@ public class BufferManager {
 			int index = 0;
 			File = new RandomAccessFile(catlogFileNameGet(), "rw");
 			int N = File.read();
-			System.out.println("N = " + N);
 			index += 4;
 			for(int i = 0; i<N; i++) {
 				File.seek(index);
@@ -196,17 +192,13 @@ public class BufferManager {
 				byte []b = new byte[tablenamelength]; 
 				File.seek(index);
 				File.read(b, 0, tablenamelength);
-//				System.out.println("b = " +  b);
 				String TableName = new String(b, "UTF-8");
-				System.out.println("tablename = " + TableName);
 				index += tablenamelength;
 				File.seek(index);
 				int RecNum = File.read();
-//				System.out.println(RecNum + " RecNum");
 				index += 4;
 				File.seek(index);
 				int AttNum = File.read();
-//				System.out.println(AttNum + " AttNum");
 				index += 4;
 				List<Attribute> attlist = new ArrayList<Attribute>();
 			
@@ -220,9 +212,7 @@ public class BufferManager {
 					index += 4;
 					File.seek(index);
 					File.read(attname, 0, AttNameLen);
-//					System.out.println("attname = " + attname);
 					String AttName = new String(attname, "UTF-8");
-//					System.out.println("AttName = " + AttName);
 					index += AttNameLen;
 					File.seek(index);
 					int length = File.read();
@@ -269,7 +259,6 @@ public class BufferManager {
 		for(int i=0; i<Max_Block; i++) {
 			if(Buffer[i].isDirty) {
 				try {
-					System.out.println("WriteBack " + i);
 					Buffer[i].WriteBack();
 				} catch (IOException e) {
 					System.out.println("Flush error");
@@ -352,15 +341,12 @@ public class BufferManager {
 	static public Block FindBlock(String FileName, int offset) {
 		int BlockOff = offset / Max_Block;
 		for(int i=0; i<Max_Block; i++){
-			System.out.println(Buffer[i].file + " " + FileName);
-			System.out.println(Buffer[i].fileOffset + " " + offset);
 			int BufferBlockOff = Buffer[i].fileOffset / Max_Block;
 			if((Buffer[i].file.equals(FileName)) && (BufferBlockOff == BlockOff))
 				return Buffer[i];
 		}
 		
 		int index = LRU();
-//		System.out.println("index = " + index);
 		if(!BufferReplace(index, FileName, offset)) {
 			System.out.println("Buffer replace error");
 			return null;

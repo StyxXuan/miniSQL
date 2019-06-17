@@ -38,7 +38,6 @@ public class Condition
 		
 		boolean res = Satisfy(tup, Row, Attributes.get(index), Numbers.get(index), Ops.get(index));
 		index++;
-		System.out.println("here to judge");
 		while(Conjunctions != null && Conjunctions.size() + 1 > index) {
 			String Con = Conjunctions.get(index-1);
 			if(Con.equals("and")) {
@@ -53,11 +52,8 @@ public class Condition
 	
 	public boolean Satisfy(Tuple tup, TableRow Row, String Attribute, String Number, Operation Op){
 		FieldType Type = Row.GetType(Attribute);
-		System.out.println(Type);
-		System.out.println(Number+ " " + Attribute);
 		boolean res = false;
 		if(Op == Operation.EQUAL) {
-			System.out.println("The operation equal");
 			if(Type == FieldType.FLOAT) {
 				float num = Float.parseFloat(Number);
 				float att = Float.parseFloat(tup.GetData(Row.GetIndex(Attribute)));
@@ -67,11 +63,8 @@ public class Condition
 				int att = Integer.parseInt(tup.GetData(Row.GetIndex(Attribute)));
 				res = (num == att);
 			}else if(Type == FieldType.STRING) {
-				System.out.println("String equal");
 				int index = Row.GetIndex(Attribute);
-				System.out.println("index = " + index);
 				String att = tup.GetData(index);
-				System.out.println("att = " + att);
 				res = (Number.equals(att));
 			}
 		}else if(Op == Operation.NOT_EQUAL) {

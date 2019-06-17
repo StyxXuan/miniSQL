@@ -32,9 +32,10 @@ public class IndexManager {
             default: System.out.println("Invalid type!"); break;
         }
     }
+
     public static boolean createIndex(String tableName, String attributeName, String indexName) {
         //Create new index file
-        indexFileName = BufferManager.indexFileNameGet(indexName);
+        indexFileName = BufferManager.indexFileNameGet(tableName + "_" + attributeName);
         Table table = BufferManager.tables.get(tableName);
         Attribute attribute = table.GetAttribute(attributeName);
         if (attribute.hasIndex || !attribute.isUnique)
@@ -81,19 +82,19 @@ public class IndexManager {
         while(CountTup  < table.RecordNum) {
             if(RowIndex >= MaxTupNum) {
                 b = BufferManager.GetNextBlock(b);
-                offset += RowIndex + 1;
+                offset = b.fileOffset;
                 RowIndex = 0;
             }
             if(b.GetInt(RowIndex * TupSize) != 0) {
                 blockOfs = RowIndex * TupSize + InitOffset + 4;
                 switch(attribute.Type) {
                     case INT:
-                        iTree.insert(b.GetInt(blockOfs), offset + RowIndex); break;
+                        iTree.insert(b.GetInt(blockOfs), offset + RowIndex * TupSize); break;
                     case FLOAT:
-                        fTree.insert(b.GetFloat(blockOfs), offset + RowIndex); break;
+                        fTree.insert(b.GetFloat(blockOfs), offset + RowIndex * TupSize); break;
                     case STRING:
                         String s = b.GetString(blockOfs, attribute.length);
-                        sTree.insert(b.GetString(blockOfs, attribute.length), offset + RowIndex); break;
+                        sTree.insert(b.GetString(blockOfs, attribute.length), offset + RowIndex * TupSize); break;
                     default:
                         break;
                 }
@@ -122,7 +123,7 @@ public class IndexManager {
     }
 
     public static boolean dropIndex(String indexName) {
-        indexFileName = BufferManager.indexFileNameGet(indexName);
+        indexFileName = BufferManager.indexFileNameGet(BufferManager.indexs.get(indexName));
         BufferManager.RemoveBlockFromBuffer(indexFileName);  //Need to be implemented in Buffermanager.java
         File fp = new File(indexFileName);
         if (!fp.delete())
@@ -157,6 +158,7 @@ public class IndexManager {
 
             case STRING:
                 resAddress = sTree.search(key);
+//                sTree.printTree();
                 break;
 
             default: break;
@@ -173,14 +175,17 @@ public class IndexManager {
         switch(attribute.Type) {
             case INT:
                 iTree.insert(Integer.parseInt(key), addr);
+//                iTree.printTree();
                 break;
 
             case FLOAT:
                 fTree.insert(Float.parseFloat(key), addr);
+//                fTree.printTree();
                 break;
 
             case STRING:
                 sTree.insert(key, addr);
+//                sTree.printTree();
                 break;
 
             default: return false;
@@ -209,6 +214,25 @@ public class IndexManager {
                 break;
 
             default: return false;
+        }
+        writeToBuffer(attribute.Type);
+        return true;
+    }
+
+    public static boolean deleteAll(String tableName, String attributeName) {
+        indexFileName = BufferManager.indexFileNameGet(tableName + "_" + attributeName);
+        Table table = BufferManager.tables.get(tableName);
+        Attribute attribute = table.GetAttribute(attributeName);
+        InitTree(attribute.Type, attribute.length);
+        switch(attribute.Type) {
+            case INT:
+                iTree.root = new TreeNode<Integer>(NodeType.LEAF); break;
+            case FLOAT:
+                fTree.root = new TreeNode<Float>(NodeType.LEAF); break;
+            case STRING:
+                sTree.root = new TreeNode<String>(NodeType.LEAF); break;
+            default:
+                break;
         }
         writeToBuffer(attribute.Type);
         return true;
@@ -438,6 +462,7 @@ public class IndexManager {
             }
         }
         indexBlock.isDirty = true;
+        indexBlock.isValid = false;
     }
 
     public static void writeFloatToBlock(TreeNode<Float> node, Block indexBlock)
@@ -476,6 +501,7 @@ public class IndexManager {
             }
         }
         indexBlock.isDirty = true;
+        indexBlock.isValid = false;
     }
 
     public static void writeStringToBlock(TreeNode<String> node, Block indexBlock)
@@ -514,5 +540,6 @@ public class IndexManager {
             }
         }
         indexBlock.isDirty = true;
+        indexBlock.isValid = false;
     }
 }

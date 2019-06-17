@@ -15,16 +15,23 @@ import CatalogManager.*;
 public class Interpreter{
 	static int index = 0;
 	/*
+execfile DBFile/insert.txt;
 create table student (sno char(8), sname char(16) unique, sage int, sgender char (1),primary key ( sno ));
-insert into student values('12345671', '1234567890123451', 12, '1');
-drop table student;
-delete from student;
-delete from student where sno = '12345671';
+insert into student values('12345629', '1234567890123451', 12, '1');
+insert into student values('12345672', '1234567890123452', 13, '1');
+insert into student values('12345673', '1234567890123453', 14, '1');
+insert into student values('12345675', '1234567890123456', 15, '1');
+insert into student values('10345610', '1234567890123457', 15, '1');
 select * from student;
-select * from student where sname = '1234567890123451';
-select * from student where sno = '12345671';
-select * from student where sno = '12345671' and sage = 12;
+select * from student where sno >= '10000000';
+select * from student where sname = '1234567890123457';
+select * from student where sno = '99990000';
+select * from student where sno = '99990000' or sage > 12;
+select * from student where sno = '99990000' or sage = 15 or sno = '89990000';
+delete from student;
+delete from student where sno = '09920000' or sage = 15;
 create index stu_index on student(sname);
+drop table student;
 drop index stu_index;
 	 */
 
@@ -550,17 +557,17 @@ drop index stu_index;
 		// file
 		else if(word.equals("execfile"))
 		{
-			System.out.println("Now execfile");
+//			System.out.println("Now execfile");
 			index = 0;
 			String filename = sql.split(" ")[1].replace(" ", "").replace(";", "");
-			System.out.println(filename);
+//			System.out.println(filename);
 			File file = new File(filename);
-			System.out.println(file.exists());
+//			System.out.println(file.exists());
 	        FileInputStream is = null;
 	        StringBuilder stringBuilder = null;
 	        try {
 	            if (file.length() != 0) {
-	            	System.out.println("here");
+//	            	System.out.println("here");
 	                is = new FileInputStream(file);
 	                InputStreamReader streamReader = new InputStreamReader(is);
 	                BufferedReader reader = new BufferedReader(streamReader);
@@ -569,7 +576,6 @@ drop index stu_index;
 	                while ((line = reader.readLine()) != null) {
 	                	stringBuilder.append(line);
 	                }
-	                System.out.println(line);
 	                reader.close();
 	                is.close();
 	            }
@@ -578,7 +584,6 @@ drop index stu_index;
 	            e.printStackTrace();
 	       }
 		    String Commands = stringBuilder.toString();
-		    System.out.println(Commands);
 		    String []Command = Commands.split(";");
 		    for(int i=0; i<Command.length; i++) {
 		    	System.out.println(Command[i]);
