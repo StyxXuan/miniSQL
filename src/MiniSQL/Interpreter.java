@@ -24,7 +24,7 @@ insert into student values('12345675', '1234567890123456', 15, '1');
 insert into student values('10345610', '1234567890123457', 15, '1');
 select * from student;
 select * from student where sno >= '10000000';
-select * from student where sname = '1234567890123457';
+select * from student where sname = '7900000000000000';
 select * from student where sno = '99990000';
 select * from student where sno = '99990000' or sage > 12;
 select * from student where sno = '99990000' or sage = 15 or sno = '89990000';
