@@ -55,15 +55,15 @@ public class BufferManager {
 				File.seek(index);
 				File.read(a, 0, TableAttLength);
 				String TableAtt = new String(a, "UTF-8");
-				index += Indexlength;
+				index += TableAttLength;
 				indexs.put(IndexName, TableAtt);
 			}
 			File.close();
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
+			System.out.println("file not file exception");
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			System.out.println("meet an exception");
 			e.printStackTrace();
 		}
 		
@@ -150,7 +150,7 @@ public class BufferManager {
 			index += 4;
 			
 			for (Map.Entry<String, String> entry : indexs.entrySet()) {	
-				String IndexName = entry.getKey();
+				String IndexName = entry.getKey(); 
 				String TableAtt = entry.getValue();
 				byte []b = IndexName.getBytes("UTF-8");
 				File.seek(index);
@@ -162,7 +162,7 @@ public class BufferManager {
 				byte []a = TableAtt.getBytes("UTF-8");
 				File.seek(index);
 				File.write(a.length);
-				index +=4;
+				index += 4;
 				File.seek(index);
 				File.write(a, 0, a.length);
 				index += a.length;

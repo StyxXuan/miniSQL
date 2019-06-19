@@ -397,7 +397,7 @@ public class BPlusTree <T extends Comparable<T>>
         Result<T> result = new Result<T>();
         if (root == null)
         {
-            System.out.println("Empty tree!");
+//            System.out.println("Empty tree!");
             return;
         }
         if (findAtLeaf(root, key, result))
@@ -426,7 +426,7 @@ public class BPlusTree <T extends Comparable<T>>
         }
         else
         {
-            System.out.println("No such a key!");
+//            System.out.println("No such a key!");
         }
     }
 

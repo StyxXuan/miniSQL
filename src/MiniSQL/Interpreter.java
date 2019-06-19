@@ -24,10 +24,10 @@ insert into student values('12345675', '1234567890123456', 15, '1');
 insert into student values('10345610', '1234567890123457', 15, '1');
 select * from student;
 select * from student where sno >= '10000000';
-select * from student where sname = '7900000000000000';
-select * from student where sno = '99990000';
-select * from student where sno = '99990000' or sage > 12;
-select * from student where sno = '99990000' or sage = 15 or sno = '89990000';
+select * from student where sname = '9000000000000000';
+select * from student where sno = '90000000';
+select * from student where sno = '90000000' or sage > 12;
+select * from student where sno = '90000000' or sage = 15 or sno = '01000000';
 delete from student;
 delete from student where sno = '09920000' or sage = 15;
 create index stu_index on student(sname);
@@ -557,17 +557,13 @@ drop index stu_index;
 		// file
 		else if(word.equals("execfile"))
 		{
-//			System.out.println("Now execfile");
 			index = 0;
 			String filename = sql.split(" ")[1].replace(" ", "").replace(";", "");
-//			System.out.println(filename);
-			File file = new File(filename);
-//			System.out.println(file.exists());
+ 			File file = new File(filename);
 	        FileInputStream is = null;
 	        StringBuilder stringBuilder = null;
 	        try {
 	            if (file.length() != 0) {
-//	            	System.out.println("here");
 	                is = new FileInputStream(file);
 	                InputStreamReader streamReader = new InputStreamReader(is);
 	                BufferedReader reader = new BufferedReader(streamReader);
@@ -583,12 +579,18 @@ drop index stu_index;
 	        	System.out.println("File Execute error");
 	            e.printStackTrace();
 	       }
+	        double time;
+	        long start = System.currentTimeMillis();
 		    String Commands = stringBuilder.toString();
 		    String []Command = Commands.split(";");
 		    for(int i=0; i<Command.length; i++) {
 		    	System.out.println(Command[i]);
 		    	excute(parse(Command[i] + ";"));
 		    }
+		    long end = System.currentTimeMillis();
+		    time = end - start;
+		    System.out.println("the request affected " + true);
+			System.out.println("using time " + time);
 			return null;
 		}
 		else{
@@ -611,7 +613,6 @@ drop index stu_index;
 				System.out.println("table already exsist");
 				return new Response(false, 0);
 			}
-			System.out.println("Now Creating the table");
 			return API.createTable(request);
 		case 2:
 			return API.createIndex(request);
@@ -624,7 +625,6 @@ drop index stu_index;
 		case 6:
 			return API.dropIndex(request);
 		case 7:
-			System.out.println("Now inserting");
 			return API.insert(request);
 		case 8:
 		case 9:

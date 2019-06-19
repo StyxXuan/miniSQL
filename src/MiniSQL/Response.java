@@ -83,10 +83,12 @@ public class Response {
 		}
 		System.out.println("the request affected " + this.Affected);
 		System.out.println("using time " + this.time);
+		System.out.println();
 	}
 	
 	public void PrintInfor() {
 		System.out.println("the request affected " + this.Affected);
 		System.out.println("using time " + this.time);
+		System.out.println();
 	}
 }

@@ -104,18 +104,18 @@ public class IndexManager {
         }
         switch(attribute.Type) {
             case INT:
-                iTree.printTree(); break;
+//                iTree.printTree(); break;
             case FLOAT:
-                fTree.printTree(); break;
+//                fTree.printTree(); break;
             case STRING:
-                sTree.printTree(); break;
+//                sTree.printTree(); break;
             default:
                 break;
         }
         //Write to file
 
         BufferManager.indexs.put(indexName, tableName + "_" + attributeName);
-        System.out.println("Indexs Map:" + BufferManager.indexs.size() + "," + BufferManager.indexs.get(indexName));
+//        System.out.println("Indexs Map:" + BufferManager.indexs.size() + "," + BufferManager.indexs.get(indexName));
         writeToBuffer(attribute.Type);
         BufferManager.FlushAll();
         attribute.hasIndex = true;
@@ -132,7 +132,7 @@ public class IndexManager {
             return false;
         }
         String [] s = BufferManager.indexs.get(indexName).split("_");
-        System.out.println(s);
+//        System.out.println(s);
         Table table = BufferManager.tables.get(s[0]);
         Attribute attribute = table.GetAttribute(s[1]);
         attribute.hasIndex = false;

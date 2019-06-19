@@ -11,14 +11,21 @@ public class MiniTest {
 		String sql = "";
 		boolean Loop = true;
 		BufferManager.Init();
+		System.out.println();
+		System.out.println("**************************Welcome to MySQL**************************");
+		System.out.println();
+		System.out.println("*********************Author: Zhao & Chen & Liu**********************");
+		System.out.println();
+		
 		while(Loop) {
 			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
 			try {
+				System.out.print("miniSQL-> ");
 				String State = "";
 				State = bufferedReader.readLine();
 				
 				sql += State;
-				System.out.println(sql);
+//				System.out.println(sql);
 				if(sql.equals("quit")){
 					BufferManager.quit();
 					break;
@@ -27,7 +34,7 @@ public class MiniTest {
 				else if(sql.contains(";")) {
 					Request Res = Interpreter.parse(sql);
 					if(Res == null) {
-						System.out.println("execute file right");
+//						System.out.println("execute file right");
 						sql = "";
 						continue;
 					}
